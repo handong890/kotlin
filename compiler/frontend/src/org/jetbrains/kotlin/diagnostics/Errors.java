@@ -214,6 +214,11 @@ public interface Errors {
     DiagnosticFactory1<JetEnumEntry, ClassDescriptor> ENUM_ENTRY_AFTER_ENUM_MEMBER = DiagnosticFactory1.create(WARNING, DECLARATION_NAME);
     DiagnosticFactory0<JetCallExpression> ENUM_CLASS_CONSTRUCTOR_CALL = DiagnosticFactory0.create(ERROR);
 
+    // Sealed-specific
+    DiagnosticFactory0<JetModifierListOwner> OPEN_MODIFIER_IN_SEALED = DiagnosticFactory0
+            .create(ERROR, modifierSetPosition(JetTokens.OPEN_KEYWORD));
+    DiagnosticFactory0<JetCallExpression> SEALED_CLASS_CONSTRUCTOR_CALL = DiagnosticFactory0.create(ERROR);
+
     // Companion objects
 
     DiagnosticFactory0<JetObjectDeclaration> MANY_COMPANION_OBJECTS = DiagnosticFactory0.create(ERROR, COMPANION_OBJECT);

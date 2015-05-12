@@ -394,15 +394,24 @@ public class BodyResolver {
             trace.report(SUPERTYPES_FOR_ANNOTATION_CLASS.on(jetClass.getDelegationSpecifierList()));
         }
 
-        Set<TypeConstructor> parentEnum =
-                jetClass instanceof JetEnumEntry
-                ? Collections.singleton(((ClassDescriptor) descriptor.getContainingDeclaration()).getTypeConstructor())
-                : Collections.<TypeConstructor>emptySet();
+        Set<TypeConstructor> parentEnumOrSealed;
+        if (jetClass instanceof JetEnumEntry) {
+            parentEnumOrSealed = Collections.singleton(((ClassDescriptor) descriptor.getContainingDeclaration()).getTypeConstructor());
+        }
+        else {
+            parentEnumOrSealed = Collections.emptySet();
+            if (descriptor.getContainingDeclaration() instanceof ClassDescriptor) {
+                ClassDescriptor containingDescriptor = (ClassDescriptor) descriptor.getContainingDeclaration();
+                if (containingDescriptor.getModality() == Modality.SEALED) {
+                    parentEnumOrSealed = Collections.singleton(containingDescriptor.getTypeConstructor());
+                }
+            }
+        }
 
         if (primaryConstructorDelegationCall[0] != null && primaryConstructor != null) {
             recordConstructorDelegationCall(trace, primaryConstructor, primaryConstructorDelegationCall[0]);
         }
-        checkSupertypeList(descriptor, supertypes, parentEnum);
+        checkSupertypeList(descriptor, supertypes, parentEnumOrSealed);
     }
 
     private static void recordConstructorDelegationCall(

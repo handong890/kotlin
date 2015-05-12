@@ -141,6 +141,7 @@ public class DefaultErrorMessages {
         MAP.put(REDUNDANT_MODIFIER, "Modifier ''{0}'' is redundant because ''{1}'' is present", TO_STRING, TO_STRING);
         MAP.put(ABSTRACT_MODIFIER_IN_TRAIT, "Modifier ''abstract'' is redundant in interface");
         MAP.put(OPEN_MODIFIER_IN_TRAIT, "Modifier ''open'' is redundant in interface");
+        MAP.put(OPEN_MODIFIER_IN_SEALED, "Modifier ''open'' is not applicable for sealed class");
         MAP.put(OPEN_MODIFIER_IN_ENUM, "Modifier ''open'' is not applicable for enum class");
         MAP.put(ABSTRACT_MODIFIER_IN_ENUM, "Modifier ''abstract'' is not applicable for enum class");
         MAP.put(ILLEGAL_ENUM_ANNOTATION, "Annotation ''enum'' is only applicable for class");
@@ -292,6 +293,7 @@ public class DefaultErrorMessages {
         MAP.put(ENUM_ENTRY_USES_DEPRECATED_SUPER_CONSTRUCTOR, "Enum entry ''{0}'' uses deprecated super constructor syntax, use ENTRY(arguments) instead", NAME);
         MAP.put(ENUM_ENTRY_AFTER_ENUM_MEMBER, "Enum entry ''{0}'' is not allowed after a member", NAME);
         MAP.put(ENUM_CLASS_CONSTRUCTOR_CALL, "Enum types cannot be instantiated");
+        MAP.put(SEALED_CLASS_CONSTRUCTOR_CALL, "Sealed types cannot be instantiated except of inner classes or objects derivation");
 
         MAP.put(DELEGATION_IN_TRAIT, "Interfaces cannot use delegation");
         MAP.put(DELEGATION_NOT_TO_TRAIT, "Only interfaces can be delegated to");

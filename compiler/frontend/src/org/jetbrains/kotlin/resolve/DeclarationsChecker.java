@@ -265,6 +265,9 @@ public class DeclarationsChecker {
                 trace.report(LOCAL_ENUM_NOT_ALLOWED.on(aClass, classDescriptor));
             }
         }
+        else if (aClass.hasModifier(JetTokens.SEALED_KEYWORD)) {
+            checkSealedModifiers(aClass);
+        }
         else if (aClass instanceof JetEnumEntry) {
             checkEnumEntry((JetEnumEntry) aClass, classDescriptor);
         }
@@ -549,6 +552,12 @@ public class DeclarationsChecker {
         }
         if (aClass.hasModifier(JetTokens.ABSTRACT_KEYWORD)) {
             trace.report(ABSTRACT_MODIFIER_IN_ENUM.on(aClass));
+        }
+    }
+
+    private void checkSealedModifiers(JetClass aClass) {
+        if (aClass.hasModifier(JetTokens.OPEN_KEYWORD)) {
+            trace.report(OPEN_MODIFIER_IN_SEALED.on(aClass));
         }
     }
 

@@ -370,6 +370,9 @@ public class ModifiersChecker {
         boolean hasAbstractModifier = modifierList.hasModifier(ABSTRACT_KEYWORD);
         boolean hasOverrideModifier = modifierList.hasModifier(OVERRIDE_KEYWORD);
 
+        if (modifierList.hasModifier(SEALED_KEYWORD)) {
+            return Modality.SEALED;
+        }
         if (modifierList.hasModifier(OPEN_KEYWORD)) {
             if (hasAbstractModifier || defaultModality == Modality.ABSTRACT) {
                 return Modality.ABSTRACT;
