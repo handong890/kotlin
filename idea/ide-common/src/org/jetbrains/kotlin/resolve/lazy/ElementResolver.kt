@@ -17,6 +17,7 @@
 package org.jetbrains.kotlin.resolve.lazy
 
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiManager
 import org.jetbrains.kotlin.analyzer.computeTypeInContext
 import org.jetbrains.kotlin.cfg.JetFlowInformationProvider
 import org.jetbrains.kotlin.context.SimpleGlobalContext
@@ -39,6 +40,7 @@ import org.jetbrains.kotlin.resolve.scopes.ChainedScope
 import org.jetbrains.kotlin.resolve.scopes.JetScope
 import org.jetbrains.kotlin.types.DynamicTypesSettings
 import org.jetbrains.kotlin.types.TypeUtils
+import org.jetbrains.kotlin.utils.Profiler
 import org.jetbrains.kotlin.utils.addToStdlib.firstIsInstanceOrNull
 
 public abstract class ElementResolver protected constructor(
@@ -157,7 +159,15 @@ public abstract class ElementResolver protected constructor(
             }
         }
 
+        val profiler = Profiler.create(
+                "${if (StatementFilter.NONE != statementFilter) "== Partial ==" else ""} ${Thread.currentThread().getName()} " +
+                "checkDeclaration: ${resolveElement.getName()} ${resolveElement.hashCode()} $this " +
+                "${PsiManager.getInstance(resolveElement.getProject()).getModificationTracker().getModificationCount()}")
+        profiler.start()
+
         JetFlowInformationProvider(resolveElement, trace).checkDeclaration()
+
+        profiler.end()
 
         return trace.getBindingContext()
     }
@@ -346,6 +356,11 @@ public abstract class ElementResolver protected constructor(
     }
 
     private fun functionAdditionalResolve(resolveSession: ResolveSession, namedFunction: JetNamedFunction, file: JetFile, statementFilter: StatementFilter): BindingTrace {
+        val profiler = Profiler.create("${if (StatementFilter.NONE != statementFilter) "-------- Partial --------" else ""} ${Thread.currentThread().getName()} " +
+                                       "Addition: ${namedFunction.getName()} ${namedFunction.hashCode()} $this " +
+                                       "${PsiManager.getInstance(namedFunction.getProject()).getModificationTracker().getModificationCount()}")
+        profiler.start()
+
         assert(statementFilter != StatementFilter.NONE)
 
         val trace = createDelegationTrace(namedFunction)
@@ -356,6 +371,8 @@ public abstract class ElementResolver protected constructor(
 
         val bodyResolver = createBodyResolver(resolveSession, trace, file, statementFilter)
         bodyResolver.resolveFunctionBody(DataFlowInfo.EMPTY, trace, namedFunction, functionDescriptor, scope)
+
+        profiler.end()
 
         return trace
     }

@@ -16,6 +16,7 @@
 
 package org.jetbrains.kotlin.resolve
 
+import com.intellij.psi.PsiManager
 import org.jetbrains.kotlin.descriptors.FunctionDescriptor
 import org.jetbrains.kotlin.psi.JetNamedFunction
 import org.jetbrains.kotlin.resolve.calls.smartcasts.DataFlowInfo
@@ -24,6 +25,7 @@ import org.jetbrains.kotlin.resolve.lazy.ForceResolveUtil
 import org.jetbrains.kotlin.resolve.lazy.LazyDeclarationResolver
 import org.jetbrains.kotlin.resolve.scopes.JetScope
 import org.jetbrains.kotlin.storage.StorageManager
+import org.jetbrains.kotlin.utils.Profiler
 import javax.inject.Inject
 import kotlin.properties.Delegates
 
@@ -66,11 +68,16 @@ public open class BodyResolveTaskManager : ResolveTaskManager {
         @Inject set
 
     public override fun resolveFunctionBody(function: JetNamedFunction): BodyResolveResult {
+        val profiler = Profiler.create("-- Body -- ${Thread.currentThread().getName()} ${function.getName()} ${function.hashCode()} $this " +
+                                       "${PsiManager.getInstance(function.getProject()).getModificationTracker().getModificationCount()}").start()
+        
         val scope = declarationScopeProvider.getResolutionScopeForDeclaration(function)
         val functionDescriptor = lazyDeclarationResolver.resolveToDescriptor(function) as FunctionDescriptor
         val dataFlowInfo = DataFlowInfo.EMPTY
 
         val bodyResolveResult = resolveFunctionBody(function, bodyResolver, BodyResolveContext(dataFlowInfo, trace, functionDescriptor, scope))
+
+        profiler.end()
 
         return bodyResolveResult
     }

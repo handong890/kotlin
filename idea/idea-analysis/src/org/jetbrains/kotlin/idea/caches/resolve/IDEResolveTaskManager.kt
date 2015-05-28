@@ -17,6 +17,7 @@
 package org.jetbrains.kotlin.idea.caches.resolve
 
 import com.intellij.openapi.project.Project
+import com.intellij.psi.PsiManager
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.PsiModificationTracker
@@ -31,6 +32,7 @@ import org.jetbrains.kotlin.resolve.*
 import org.jetbrains.kotlin.resolve.calls.smartcasts.DataFlowInfo
 import org.jetbrains.kotlin.resolve.lazy.ResolveSession
 import org.jetbrains.kotlin.storage.MemoizedFunctionToNotNull
+import org.jetbrains.kotlin.utils.Profiler
 
 public interface IDEResolveTaskManager: ResolveTaskManager {
     public fun hasElementAdditionalResolveCached(function: JetNamedFunction): Boolean = false
@@ -68,12 +70,17 @@ class IDEResolveTaskManagerImpl(val globalContext: GlobalContext,
     }
 
     private fun doResolveFunctionBody(function: JetNamedFunction): BodyResolveResult {
+        val profiler = Profiler.create("-- IDE -- ${Thread.currentThread().getName()} ${function.getName()} ${function.hashCode()} $this " +
+                                       "${PsiManager.getInstance(function.getProject()).getModificationTracker().getModificationCount()}").start()
+
         val scope = resolveSession.getScopeProvider().getResolutionScopeForDeclaration(function)
         val functionDescriptor = resolveSession.resolveToDescriptor(function) as FunctionDescriptor
         val dataFlowInfo = DataFlowInfo.EMPTY
 
         val bodyResolveResult = BodyResolveTaskManager.resolveFunctionBody(
                 function, bodyResolve, BodyResolveContext(dataFlowInfo, resolveSession.getTrace(), functionDescriptor, scope))
+
+        profiler.end()
 
         return bodyResolveResult
     }
