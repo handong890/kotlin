@@ -16,7 +16,10 @@
 
 package kotlin.jvm.internal;
 
+import kotlin.jvm.KotlinReflectionNotSupportedError;
 import kotlin.reflect.*;
+
+import java.util.List;
 
 public abstract class FunctionReference
         extends FunctionImpl
@@ -38,5 +41,20 @@ public abstract class FunctionReference
     @Override
     public int getArity() {
         return arity;
+    }
+
+    // The following methods provide the information identifying this function, which is used by the reflection implementation.
+    // They are supposed to be overridden in each subclass (each anonymous class generated for a function reference).
+
+    public KDeclarationContainer getOwner() {
+        throw error();
+    }
+
+    public String getSignature() {
+        throw error();
+    }
+
+    private static Error error() {
+        throw new KotlinReflectionNotSupportedError();
     }
 }

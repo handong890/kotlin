@@ -1422,7 +1422,8 @@ public class ExpressionCodegen extends JetVisitor<StackValue, StackValue> implem
         );
 
         ClosureCodegen closureCodegen = new ClosureCodegen(
-                state, declaration, samType, context.intoClosure(descriptor, this, typeMapper), kind, strategy, parentCodegen, cv
+                state, declaration, samType, context.intoClosure(descriptor, this, typeMapper), kind,
+                functionReferenceTarget, strategy, parentCodegen, cv
         );
 
         closureCodegen.generate();
@@ -1432,7 +1433,7 @@ public class ExpressionCodegen extends JetVisitor<StackValue, StackValue> implem
             propagateChildReifiedTypeParametersUsages(closureCodegen.getReifiedTypeParametersUsages());
         }
 
-        return closureCodegen.putInstanceOnStack(this, functionReferenceTarget);
+        return closureCodegen.putInstanceOnStack(this);
     }
 
     @Override
@@ -2722,7 +2723,7 @@ public class ExpressionCodegen extends JetVisitor<StackValue, StackValue> implem
         assert state.getReflectionTypes().getkClass().getTypeConstructor().equals(type.getConstructor())
                 : "::class expression should be type checked to a KClass: " + type;
 
-        return generateClassLiteralReference(KotlinPackage.single(type.getArguments()).getType());
+        return generateClassLiteralReference(typeMapper, KotlinPackage.single(type.getArguments()).getType());
     }
 
     @Override
@@ -2815,7 +2816,7 @@ public class ExpressionCodegen extends JetVisitor<StackValue, StackValue> implem
             @Override
             public Unit invoke(InstructionAdapter v) {
                 v.visitLdcInsn(descriptor.getName().asString());
-                StackValue receiverClass = generateClassLiteralReference(containingClass.getDefaultType());
+                StackValue receiverClass = generateClassLiteralReference(typeMapper, containingClass.getDefaultType());
                 receiverClass.put(receiverClass.type, v);
                 v.invokestatic(REFLECTION, factoryMethod.getName(), factoryMethod.getDescriptor(), false);
 
@@ -2825,7 +2826,7 @@ public class ExpressionCodegen extends JetVisitor<StackValue, StackValue> implem
     }
 
     @NotNull
-    private StackValue generateClassLiteralReference(@NotNull final JetType type) {
+    public static StackValue generateClassLiteralReference(@NotNull final JetTypeMapper typeMapper, @NotNull final JetType type) {
         return StackValue.operation(K_CLASS_TYPE, new Function1<InstructionAdapter, Unit>() {
             @Override
             public Unit invoke(InstructionAdapter v) {
