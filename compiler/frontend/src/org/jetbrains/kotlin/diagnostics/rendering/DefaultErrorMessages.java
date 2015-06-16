@@ -296,7 +296,7 @@ public class DefaultErrorMessages {
         MAP.put(ENUM_ENTRY_USES_DEPRECATED_SUPER_CONSTRUCTOR, "Enum entry ''{0}'' uses deprecated super constructor syntax, use ENTRY(arguments) instead", NAME);
         MAP.put(ENUM_ENTRY_AFTER_ENUM_MEMBER, "Enum entry ''{0}'' is not allowed after a member", NAME);
         MAP.put(ENUM_CLASS_CONSTRUCTOR_CALL, "Enum types cannot be instantiated");
-        MAP.put(SEALED_CLASS_CONSTRUCTOR_CALL, "Sealed types cannot be instantiated except of inner classes or objects derivation");
+        MAP.put(SEALED_CLASS_CONSTRUCTOR_CALL, "Sealed types cannot be instantiated");
 
         MAP.put(DELEGATION_IN_TRAIT, "Interfaces cannot use delegation");
         MAP.put(DELEGATION_NOT_TO_TRAIT, "Only interfaces can be delegated to");
@@ -435,6 +435,8 @@ public class DefaultErrorMessages {
         MAP.put(TRAIT_WITH_SUPERCLASS, "An interface cannot inherit from a class");
         MAP.put(SUPERTYPE_APPEARS_TWICE, "A supertype appears twice");
         MAP.put(FINAL_SUPERTYPE, "This type is final, so it cannot be inherited from");
+        MAP.put(SEALED_SUPERTYPE, "This type is sealed, so it can be inherited by only its own nested classes or objects");
+        MAP.put(SEALED_SUPERTYPE_USED_INDIRECTLY, "This type can only be inherited by DIRECTLY nested classes or objects");
         MAP.put(SINGLETON_IN_SUPERTYPE, "Cannot inherit from a singleton");
 
         MAP.put(CYCLIC_CONSTRUCTOR_DELEGATION_CALL, "There's a cycle in the delegation calls chain");

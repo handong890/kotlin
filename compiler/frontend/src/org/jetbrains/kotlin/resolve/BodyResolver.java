@@ -473,7 +473,21 @@ public class BodyResolver {
                 trace.report(SINGLETON_IN_SUPERTYPE.on(typeReference));
             }
             else if (constructor.isFinal() && !allowedFinalSupertypes.contains(constructor)) {
-                trace.report(FINAL_SUPERTYPE.on(typeReference));
+                if (classDescriptor.getModality() == Modality.SEALED) {
+                    DeclarationDescriptor containingDescriptor = supertypeOwner.getContainingDeclaration();
+                    while (containingDescriptor != null && containingDescriptor != classDescriptor) {
+                        containingDescriptor = containingDescriptor.getContainingDeclaration();
+                    }
+                    if (containingDescriptor == null) {
+                        trace.report(SEALED_SUPERTYPE.on(typeReference));
+                    }
+                    else {
+                        trace.report(SEALED_SUPERTYPE_USED_INDIRECTLY.on(typeReference));
+                    }
+                }
+                else {
+                    trace.report(FINAL_SUPERTYPE.on(typeReference));
+                }
             }
         }
     }

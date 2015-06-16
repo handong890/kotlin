@@ -4,6 +4,6 @@ sealed class Sealed(val x: Int) {
         object Second: NonFirst(34, 2)
         object Third: NonFirst(56, 3)
         // It's not allowed to instantiate Sealed here
-        object Fourth: <!FINAL_SUPERTYPE!>Sealed<!>(78)
+        object Fourth: <!SEALED_SUPERTYPE_USED_INDIRECTLY!>Sealed<!>(78)
     }
 }

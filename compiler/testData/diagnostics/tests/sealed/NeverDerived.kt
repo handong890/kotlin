@@ -2,6 +2,6 @@ sealed class Base {
 
 }
 
-class Derived: <!FINAL_SUPERTYPE!>Base<!>() {
+class Derived: <!SEALED_SUPERTYPE!>Base<!>() {
 
 }

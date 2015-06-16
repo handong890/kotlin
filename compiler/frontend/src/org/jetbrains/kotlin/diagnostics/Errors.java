@@ -223,6 +223,8 @@ public interface Errors {
     DiagnosticFactory0<JetModifierListOwner> ABSTRACT_MODIFIER_IN_SEALED = DiagnosticFactory0
             .create(WARNING, modifierSetPosition(JetTokens.ABSTRACT_KEYWORD));
     DiagnosticFactory0<JetCallExpression> SEALED_CLASS_CONSTRUCTOR_CALL = DiagnosticFactory0.create(ERROR);
+    DiagnosticFactory0<JetTypeReference> SEALED_SUPERTYPE = DiagnosticFactory0.create(ERROR);
+    DiagnosticFactory0<JetTypeReference> SEALED_SUPERTYPE_USED_INDIRECTLY = DiagnosticFactory0.create(ERROR);
 
     // Companion objects
 
