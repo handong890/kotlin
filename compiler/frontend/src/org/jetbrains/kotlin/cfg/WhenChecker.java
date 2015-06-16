@@ -20,9 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns;
 import org.jetbrains.kotlin.descriptors.*;
-import org.jetbrains.kotlin.lexer.JetTokens;
 import org.jetbrains.kotlin.psi.*;
-import org.jetbrains.kotlin.psi.psiUtil.PsiUtilPackage;
 import org.jetbrains.kotlin.resolve.BindingContext;
 import org.jetbrains.kotlin.resolve.BindingTrace;
 import org.jetbrains.kotlin.resolve.CompileTimeConstantUtils;
@@ -30,7 +28,9 @@ import org.jetbrains.kotlin.resolve.bindingContextUtil.BindingContextUtilPackage
 import org.jetbrains.kotlin.types.JetType;
 import org.jetbrains.kotlin.types.TypeUtils;
 
-import static org.jetbrains.kotlin.resolve.BindingContext.TYPE;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import static org.jetbrains.kotlin.resolve.DescriptorUtils.isEnumEntry;
 import static org.jetbrains.kotlin.resolve.DescriptorUtils.isEnumClass;
 import static org.jetbrains.kotlin.types.TypesPackage.isFlexible;
@@ -85,8 +85,10 @@ public final class WhenChecker {
     }
 
     public static boolean isWhenOnEnumExhaustive(
-            @NotNull JetWhenExpression expression, @NotNull BindingTrace trace, @NotNull ClassDescriptor enumClassDescriptor) {
-        assert isEnumClass(enumClassDescriptor);
+            @NotNull JetWhenExpression expression, @NotNull BindingTrace trace, @NotNull ClassDescriptor enumClassDescriptor
+    ) {
+        assert isEnumClass(enumClassDescriptor) :
+                "isWhenOnEnumExhaustive should be called with an enum class descriptor";
         boolean notEmpty = false;
         for (DeclarationDescriptor descriptor : enumClassDescriptor.getUnsubstitutedInnerClassesScope().getAllDescriptors()) {
             if (isEnumEntry(descriptor)) {
@@ -100,18 +102,21 @@ public final class WhenChecker {
     }
 
     private static boolean isWhenOnSealedClassExhaustive(
-            @NotNull JetWhenExpression expression, @NotNull BindingTrace trace, @NotNull ClassDescriptor classDescriptor) {
-        assert classDescriptor.getModality() == Modality.SEALED;
-        boolean notEmpty = false;
+            @NotNull JetWhenExpression expression, @NotNull BindingTrace trace, @NotNull ClassDescriptor classDescriptor
+    ) {
+        assert classDescriptor.getModality() == Modality.SEALED :
+                "isWhenOnSealedClassExhaustive should be called with a sealed class descriptor";
+        Set<ClassDescriptor> memberClassDescriptors = new LinkedHashSet<ClassDescriptor>();
         for (DeclarationDescriptor descriptor : classDescriptor.getUnsubstitutedInnerClassesScope().getAllDescriptors()) {
             if (descriptor instanceof ClassDescriptor) {
-                notEmpty = true;
-                if (!containsIsClassCase(expression, (ClassDescriptor) descriptor, trace)) {
-                    return false;
+                ClassDescriptor memberClassDescriptor = (ClassDescriptor) descriptor;
+                if (memberClassDescriptor.getTypeConstructor().getSupertypes().contains(classDescriptor.getDefaultType())) {
+                    memberClassDescriptors.add(memberClassDescriptor);
                 }
             }
         }
-        return notEmpty;
+        // When on a sealed class without derived members is considered non-exhaustive (see test WhenOnEmptySealed)
+        return !memberClassDescriptors.isEmpty() && containsIsClassCases(expression, memberClassDescriptors, trace);
     }
 
     /**
@@ -187,29 +192,34 @@ public final class WhenChecker {
         return false;
     }
 
-    private static boolean containsIsClassCase(
+    private static boolean containsIsClassCases(
             @NotNull JetWhenExpression whenExpression,
-            @NotNull ClassDescriptor sealedMemberClass,
+            @NotNull Set<ClassDescriptor> memberDescriptors,
             @NotNull BindingTrace trace
     ) {
+        Set<ClassDescriptor> checkedDescriptors = new LinkedHashSet<ClassDescriptor>();
         for (JetWhenEntry whenEntry : whenExpression.getEntries()) {
             for (JetWhenCondition condition : whenEntry.getConditions()) {
                 if (!(condition instanceof JetWhenConditionIsPattern)) {
                     continue;
                 }
                 JetWhenConditionIsPattern conditionIsPattern = (JetWhenConditionIsPattern) condition;
-                boolean isNegated = conditionIsPattern.isNegated();
                 JetType checkedType = trace.get(BindingContext.TYPE, conditionIsPattern.getTypeReference());
                 if (checkedType == null) {
                     continue;
                 }
                 ClassDescriptor checkedDescriptor = TypeUtils.getClassDescriptor(checkedType);
-                if (sealedMemberClass.equals(checkedDescriptor) ^ isNegated) {
-                    return true;
+                if (conditionIsPattern.isNegated()) {
+                    if (checkedDescriptors.contains(checkedDescriptor)) return true; // all members are already there
+                    checkedDescriptors.addAll(memberDescriptors);
+                    checkedDescriptors.remove(checkedDescriptor);
+                }
+                else {
+                    checkedDescriptors.add(checkedDescriptor);
                 }
             }
         }
-        return false;
+        return checkedDescriptors.containsAll(memberDescriptors);
     }
 
     public static boolean containsNullCase(@NotNull JetWhenExpression expression, @NotNull BindingTrace trace) {

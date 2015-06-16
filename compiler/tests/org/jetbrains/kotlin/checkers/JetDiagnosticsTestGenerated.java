@@ -11427,6 +11427,18 @@ public class JetDiagnosticsTestGenerated extends AbstractJetDiagnosticsTest {
                 doTest(fileName);
             }
 
+            @TestMetadata("ExhaustiveWhenNegatedTwice.kt")
+            public void testExhaustiveWhenNegatedTwice() throws Exception {
+                String fileName = JetTestUtils.navigationMetadata("compiler/testData/diagnostics/tests/sealed/ExhaustiveWhenNegatedTwice.kt");
+                doTest(fileName);
+            }
+
+            @TestMetadata("ExhaustiveWhenWithAdditionalMember.kt")
+            public void testExhaustiveWhenWithAdditionalMember() throws Exception {
+                String fileName = JetTestUtils.navigationMetadata("compiler/testData/diagnostics/tests/sealed/ExhaustiveWhenWithAdditionalMember.kt");
+                doTest(fileName);
+            }
+
             @TestMetadata("NeverConstructed.kt")
             public void testNeverConstructed() throws Exception {
                 String fileName = JetTestUtils.navigationMetadata("compiler/testData/diagnostics/tests/sealed/NeverConstructed.kt");
@@ -11484,6 +11496,12 @@ public class JetDiagnosticsTestGenerated extends AbstractJetDiagnosticsTest {
             @TestMetadata("TreeWhenFunctional.kt")
             public void testTreeWhenFunctional() throws Exception {
                 String fileName = JetTestUtils.navigationMetadata("compiler/testData/diagnostics/tests/sealed/TreeWhenFunctional.kt");
+                doTest(fileName);
+            }
+
+            @TestMetadata("WhenOnEmptySealed.kt")
+            public void testWhenOnEmptySealed() throws Exception {
+                String fileName = JetTestUtils.navigationMetadata("compiler/testData/diagnostics/tests/sealed/WhenOnEmptySealed.kt");
                 doTest(fileName);
             }
         }
