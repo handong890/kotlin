@@ -144,6 +144,8 @@ public class DefaultErrorMessages {
         MAP.put(OPEN_MODIFIER_IN_SEALED, "Modifier ''open'' is not applicable for sealed class");
         MAP.put(OPEN_MODIFIER_IN_ENUM, "Modifier ''open'' is not applicable for enum class");
         MAP.put(ABSTRACT_MODIFIER_IN_ENUM, "Modifier ''abstract'' is not applicable for enum class");
+        MAP.put(ABSTRACT_MODIFIER_IN_SEALED, "Modifier ''abstract'' is redundant for sealed class");
+        MAP.put(FINAL_MODIFIER_IN_SEALED, "Modifier ''final'' is not applicable for sealed class");
         MAP.put(ILLEGAL_ENUM_ANNOTATION, "Annotation ''enum'' is only applicable for class");
         MAP.put(REDUNDANT_MODIFIER_IN_GETTER, "Visibility modifiers are redundant in getter");
         MAP.put(TRAIT_CAN_NOT_BE_FINAL, "Interface cannot be final");

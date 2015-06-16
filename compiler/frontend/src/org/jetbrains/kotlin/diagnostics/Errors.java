@@ -217,6 +217,10 @@ public interface Errors {
     // Sealed-specific
     DiagnosticFactory0<JetModifierListOwner> OPEN_MODIFIER_IN_SEALED = DiagnosticFactory0
             .create(ERROR, modifierSetPosition(JetTokens.OPEN_KEYWORD));
+    DiagnosticFactory0<JetModifierListOwner> FINAL_MODIFIER_IN_SEALED = DiagnosticFactory0
+            .create(ERROR, modifierSetPosition(JetTokens.FINAL_KEYWORD));
+    DiagnosticFactory0<JetModifierListOwner> ABSTRACT_MODIFIER_IN_SEALED = DiagnosticFactory0
+            .create(WARNING, modifierSetPosition(JetTokens.ABSTRACT_KEYWORD));
     DiagnosticFactory0<JetCallExpression> SEALED_CLASS_CONSTRUCTOR_CALL = DiagnosticFactory0.create(ERROR);
 
     // Companion objects

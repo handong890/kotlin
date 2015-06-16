@@ -559,6 +559,12 @@ public class DeclarationsChecker {
         if (aClass.hasModifier(JetTokens.OPEN_KEYWORD)) {
             trace.report(OPEN_MODIFIER_IN_SEALED.on(aClass));
         }
+        if (aClass.hasModifier(JetTokens.FINAL_KEYWORD)) {
+            trace.report(FINAL_MODIFIER_IN_SEALED.on(aClass));
+        }
+        if (aClass.hasModifier(JetTokens.ABSTRACT_KEYWORD)) {
+            trace.report(ABSTRACT_MODIFIER_IN_SEALED.on(aClass));
+        }
     }
 
     // Temporary
