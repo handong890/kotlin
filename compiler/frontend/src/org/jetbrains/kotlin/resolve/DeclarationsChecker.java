@@ -322,6 +322,9 @@ public class DeclarationsChecker {
         if (modifierList.hasModifier(JetTokens.FINAL_KEYWORD)) {
             trace.report(Errors.TRAIT_CAN_NOT_BE_FINAL.on(aClass));
         }
+        if (modifierList.hasModifier(JetTokens.SEALED_KEYWORD)) {
+            trace.report(Errors.TRAIT_CAN_NOT_BE_SEALED.on(aClass));
+        }
         if (modifierList.hasModifier(JetTokens.ABSTRACT_KEYWORD)) {
             trace.report(Errors.ABSTRACT_MODIFIER_IN_TRAIT.on(aClass));
         }

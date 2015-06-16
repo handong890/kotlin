@@ -185,6 +185,7 @@ public interface Errors {
     DiagnosticFactory0<JetModifierListOwner> OPEN_MODIFIER_IN_TRAIT = DiagnosticFactory0
             .create(WARNING, modifierSetPosition(JetTokens.OPEN_KEYWORD));
     DiagnosticFactory0<JetModifierListOwner> TRAIT_CAN_NOT_BE_FINAL = DiagnosticFactory0.create(ERROR, FINAL_MODIFIER);
+    DiagnosticFactory0<JetModifierListOwner> TRAIT_CAN_NOT_BE_SEALED = DiagnosticFactory0.create(ERROR, SEALED_MODIFIER);
 
     DiagnosticFactory0<JetDeclaration> CONSTRUCTOR_IN_TRAIT = DiagnosticFactory0.create(ERROR, DECLARATION_SIGNATURE);
 

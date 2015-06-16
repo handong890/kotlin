@@ -11457,6 +11457,18 @@ public class JetDiagnosticsTestGenerated extends AbstractJetDiagnosticsTest {
                 doTest(fileName);
             }
 
+            @TestMetadata("NeverInterface.kt")
+            public void testNeverInterface() throws Exception {
+                String fileName = JetTestUtils.navigationMetadata("compiler/testData/diagnostics/tests/sealed/NeverInterface.kt");
+                doTest(fileName);
+            }
+
+            @TestMetadata("NeverObject.kt")
+            public void testNeverObject() throws Exception {
+                String fileName = JetTestUtils.navigationMetadata("compiler/testData/diagnostics/tests/sealed/NeverObject.kt");
+                doTest(fileName);
+            }
+
             @TestMetadata("NeverOpen.kt")
             public void testNeverOpen() throws Exception {
                 String fileName = JetTestUtils.navigationMetadata("compiler/testData/diagnostics/tests/sealed/NeverOpen.kt");
