@@ -145,6 +145,7 @@ public class DefaultErrorMessages {
         MAP.put(OPEN_MODIFIER_IN_ENUM, "Modifier ''open'' is not applicable for enum class");
         MAP.put(ABSTRACT_MODIFIER_IN_ENUM, "Modifier ''abstract'' is not applicable for enum class");
         MAP.put(ABSTRACT_MODIFIER_IN_SEALED, "Modifier ''abstract'' is redundant for sealed class");
+        MAP.put(SEALED_MODIFIER_IN_ENUM, "Modifier ''sealed'' is not applicable for enum class");
         MAP.put(FINAL_MODIFIER_IN_SEALED, "Modifier ''final'' is not applicable for sealed class");
         MAP.put(ILLEGAL_ENUM_ANNOTATION, "Annotation ''enum'' is only applicable for class");
         MAP.put(REDUNDANT_MODIFIER_IN_GETTER, "Visibility modifiers are redundant in getter");
@@ -436,7 +437,7 @@ public class DefaultErrorMessages {
         MAP.put(SUPERTYPE_APPEARS_TWICE, "A supertype appears twice");
         MAP.put(FINAL_SUPERTYPE, "This type is final, so it cannot be inherited from");
         MAP.put(SEALED_SUPERTYPE, "This type is sealed, so it can be inherited by only its own nested classes or objects");
-        MAP.put(SEALED_SUPERTYPE_USED_INDIRECTLY, "This type can only be inherited by DIRECTLY nested classes or objects");
+        MAP.put(SEALED_SUPERTYPE_IN_LOCAL_CLASS, "The sealed type cannot be inherited by a local class");
         MAP.put(SINGLETON_IN_SUPERTYPE, "Cannot inherit from a singleton");
 
         MAP.put(CYCLIC_CONSTRUCTOR_DELEGATION_CALL, "There's a cycle in the delegation calls chain");

@@ -3,7 +3,13 @@ sealed class Sealed(val x: Int) {
     open class NonFirst(x: Int, val y: Int): Sealed(x) {
         object Second: NonFirst(34, 2)
         object Third: NonFirst(56, 3)
-        // It's ALLOWED to instantiate Sealed also here
-        object Fourth: Sealed(78)
     }
 }
+
+fun foo(s: Sealed): Int {
+    return when(s) {
+        is Sealed.NonFirst -> 0
+        else -> -1
+    }
+}
+

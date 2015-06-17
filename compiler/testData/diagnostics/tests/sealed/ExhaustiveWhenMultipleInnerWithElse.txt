@@ -1,0 +1,79 @@
+package
+
+internal fun foo(/*0*/ s: Sealed): kotlin.Int
+
+internal sealed class Sealed {
+    public constructor Sealed(/*0*/ x: kotlin.Int)
+    internal final val x: kotlin.Int
+    public open override /*1*/ /*fake_override*/ fun equals(/*0*/ other: kotlin.Any?): kotlin.Boolean
+    public open override /*1*/ /*fake_override*/ fun hashCode(): kotlin.Int
+    public open override /*1*/ /*fake_override*/ fun toString(): kotlin.String
+
+    internal object First : Sealed {
+        private constructor First()
+        internal final override /*1*/ /*fake_override*/ val x: kotlin.Int
+        public open override /*1*/ /*fake_override*/ fun equals(/*0*/ other: kotlin.Any?): kotlin.Boolean
+        public open override /*1*/ /*fake_override*/ fun hashCode(): kotlin.Int
+        public open override /*1*/ /*fake_override*/ fun toString(): kotlin.String
+    }
+
+    internal open class NonFirst : Sealed {
+        public constructor NonFirst(/*0*/ x: kotlin.Int, /*1*/ y: kotlin.Int)
+        internal final override /*1*/ /*fake_override*/ val x: kotlin.Int
+        internal final val y: kotlin.Int
+        public open override /*1*/ /*fake_override*/ fun equals(/*0*/ other: kotlin.Any?): kotlin.Boolean
+        public open override /*1*/ /*fake_override*/ fun hashCode(): kotlin.Int
+        public open override /*1*/ /*fake_override*/ fun toString(): kotlin.String
+
+        internal final class NonSecond : Sealed.NonFirst {
+            public constructor NonSecond(/*0*/ x: kotlin.Int, /*1*/ y: kotlin.Int, /*2*/ z: kotlin.Int)
+            internal final override /*1*/ /*fake_override*/ val x: kotlin.Int
+            internal final override /*1*/ /*fake_override*/ val y: kotlin.Int
+            internal final val z: kotlin.Int
+            public open override /*1*/ /*fake_override*/ fun equals(/*0*/ other: kotlin.Any?): kotlin.Boolean
+            public open override /*1*/ /*fake_override*/ fun hashCode(): kotlin.Int
+            public open override /*1*/ /*fake_override*/ fun toString(): kotlin.String
+
+            internal final class NonThird : Sealed {
+                public constructor NonThird(/*0*/ x: kotlin.Int)
+                internal final override /*1*/ /*fake_override*/ val x: kotlin.Int
+                public open override /*1*/ /*fake_override*/ fun equals(/*0*/ other: kotlin.Any?): kotlin.Boolean
+                public open override /*1*/ /*fake_override*/ fun hashCode(): kotlin.Int
+                public open override /*1*/ /*fake_override*/ fun toString(): kotlin.String
+
+                internal final class Fifth : Sealed {
+                    public constructor Fifth(/*0*/ x: kotlin.Int)
+                    internal final override /*1*/ /*fake_override*/ val x: kotlin.Int
+                    public open override /*1*/ /*fake_override*/ fun equals(/*0*/ other: kotlin.Any?): kotlin.Boolean
+                    public open override /*1*/ /*fake_override*/ fun hashCode(): kotlin.Int
+                    public open override /*1*/ /*fake_override*/ fun toString(): kotlin.String
+                }
+
+                internal object Fourth : Sealed.NonFirst {
+                    private constructor Fourth()
+                    internal final override /*1*/ /*fake_override*/ val x: kotlin.Int
+                    internal final override /*1*/ /*fake_override*/ val y: kotlin.Int
+                    public open override /*1*/ /*fake_override*/ fun equals(/*0*/ other: kotlin.Any?): kotlin.Boolean
+                    public open override /*1*/ /*fake_override*/ fun hashCode(): kotlin.Int
+                    public open override /*1*/ /*fake_override*/ fun toString(): kotlin.String
+                }
+            }
+
+            internal object Third : Sealed {
+                private constructor Third()
+                internal final override /*1*/ /*fake_override*/ val x: kotlin.Int
+                public open override /*1*/ /*fake_override*/ fun equals(/*0*/ other: kotlin.Any?): kotlin.Boolean
+                public open override /*1*/ /*fake_override*/ fun hashCode(): kotlin.Int
+                public open override /*1*/ /*fake_override*/ fun toString(): kotlin.String
+            }
+        }
+
+        internal object Second : Sealed {
+            private constructor Second()
+            internal final override /*1*/ /*fake_override*/ val x: kotlin.Int
+            public open override /*1*/ /*fake_override*/ fun equals(/*0*/ other: kotlin.Any?): kotlin.Boolean
+            public open override /*1*/ /*fake_override*/ fun hashCode(): kotlin.Int
+            public open override /*1*/ /*fake_override*/ fun toString(): kotlin.String
+        }
+    }
+}

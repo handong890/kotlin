@@ -400,10 +400,14 @@ public class BodyResolver {
         }
         else {
             parentEnumOrSealed = Collections.emptySet();
-            if (descriptor.getContainingDeclaration() instanceof ClassDescriptor) {
-                ClassDescriptor containingDescriptor = (ClassDescriptor) descriptor.getContainingDeclaration();
-                if (containingDescriptor.getModality() == Modality.SEALED) {
-                    parentEnumOrSealed = Collections.singleton(containingDescriptor.getTypeConstructor());
+            ClassDescriptor currentDescriptor = descriptor;
+            while (currentDescriptor.getContainingDeclaration() instanceof ClassDescriptor) {
+                currentDescriptor = (ClassDescriptor) currentDescriptor.getContainingDeclaration();
+                if (currentDescriptor.getModality() == Modality.SEALED) {
+                    if (parentEnumOrSealed.isEmpty()) {
+                        parentEnumOrSealed = new HashSet<TypeConstructor>();
+                    }
+                    parentEnumOrSealed.add(currentDescriptor.getTypeConstructor());
                 }
             }
         }
@@ -482,7 +486,7 @@ public class BodyResolver {
                         trace.report(SEALED_SUPERTYPE.on(typeReference));
                     }
                     else {
-                        trace.report(SEALED_SUPERTYPE_USED_INDIRECTLY.on(typeReference));
+                        trace.report(SEALED_SUPERTYPE_IN_LOCAL_CLASS.on(typeReference));
                     }
                 }
                 else {

@@ -556,6 +556,9 @@ public class DeclarationsChecker {
         if (aClass.hasModifier(JetTokens.ABSTRACT_KEYWORD)) {
             trace.report(ABSTRACT_MODIFIER_IN_ENUM.on(aClass));
         }
+        if (aClass.hasModifier(JetTokens.SEALED_KEYWORD)) {
+            trace.report(SEALED_MODIFIER_IN_ENUM.on(aClass));
+        }
     }
 
     private void checkSealedModifiers(JetClass aClass) {
