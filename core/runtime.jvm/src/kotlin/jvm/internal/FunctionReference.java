@@ -54,6 +54,14 @@ public abstract class FunctionReference
         throw error();
     }
 
+    // The following methods are the stub implementations of reflection functions.
+    // They are called when you're using reflection on a function reference without the reflection implementation in the classpath.
+
+    @Override
+    public String getName() {
+        throw error();
+    }
+
     private static Error error() {
         throw new KotlinReflectionNotSupportedError();
     }

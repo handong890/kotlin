@@ -19,16 +19,23 @@ package kotlin.reflect.jvm.internal
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns
 import org.jetbrains.kotlin.builtins.PrimitiveType
 import org.jetbrains.kotlin.descriptors.ClassDescriptor
+import org.jetbrains.kotlin.descriptors.FunctionDescriptor
 import org.jetbrains.kotlin.descriptors.TypeParameterDescriptor
-import org.jetbrains.kotlin.load.java.structure.reflect.classId
+import org.jetbrains.kotlin.load.java.descriptors.JavaMethodDescriptor
+import org.jetbrains.kotlin.load.java.sources.JavaSourceElement
+import org.jetbrains.kotlin.load.java.structure.*
+import org.jetbrains.kotlin.load.java.structure.reflect.*
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.platform.JavaToKotlinClassMap
 import org.jetbrains.kotlin.resolve.DescriptorUtils
 import org.jetbrains.kotlin.resolve.descriptorUtil.classId
 import org.jetbrains.kotlin.resolve.jvm.JvmClassName
 import org.jetbrains.kotlin.resolve.jvm.JvmPrimitiveType
+import org.jetbrains.kotlin.serialization.deserialization.descriptors.DeserializedSimpleFunctionDescriptor
+import org.jetbrains.kotlin.serialization.jvm.JvmProtoBuf
 import org.jetbrains.kotlin.types.JetType
 import org.jetbrains.kotlin.types.TypeUtils
+import kotlin.reflect.KotlinReflectionInternalError
 
 object RuntimeTypeMapper {
     // TODO: this logic must be shared with JetTypeMapper
@@ -60,6 +67,114 @@ object RuntimeTypeMapper {
         JavaToKotlinClassMap.INSTANCE.mapKotlinToJava(fqName)?.let { return it.desc }
 
         return classDescriptor.classId.desc
+    }
+
+    fun mapSignature(function: FunctionDescriptor): String {
+        if (function is DeserializedSimpleFunctionDescriptor) {
+            val proto = function.getProto()
+            val nameResolver = function.getNameResolver()
+            if (!proto.hasExtension(JvmProtoBuf.methodSignature)) {
+                throw KotlinReflectionInternalError("No metadata found for $function")
+            }
+            val signature = proto.getExtension(JvmProtoBuf.methodSignature)
+            return StringBuilder {
+                fun appendType(type: JvmProtoBuf.JvmType) {
+                    repeat(type.getArrayDimension()) {
+                        append("[")
+                    }
+
+                    if (type.hasClassFqName()) {
+                        val fqName = nameResolver.getFqName(type.getClassFqName())
+                        append("L")
+                        append(fqName.asString().replace('.', '/'))
+                        append(";")
+                    }
+                    else if (type.hasPrimitiveType()) {
+                        append(
+                                when (type.getPrimitiveType()!!) {
+                                    JvmProtoBuf.JvmType.PrimitiveType.VOID -> "V"
+                                    JvmProtoBuf.JvmType.PrimitiveType.BOOLEAN -> "Z"
+                                    JvmProtoBuf.JvmType.PrimitiveType.CHAR -> "C"
+                                    JvmProtoBuf.JvmType.PrimitiveType.BYTE -> "B"
+                                    JvmProtoBuf.JvmType.PrimitiveType.SHORT -> "S"
+                                    JvmProtoBuf.JvmType.PrimitiveType.INT -> "I"
+                                    JvmProtoBuf.JvmType.PrimitiveType.FLOAT -> "F"
+                                    JvmProtoBuf.JvmType.PrimitiveType.LONG -> "J"
+                                    JvmProtoBuf.JvmType.PrimitiveType.DOUBLE -> "D"
+                                }
+                        )
+                    }
+                    else {
+                        throw KotlinReflectionInternalError("Incorrect metadata for $function")
+                    }
+                }
+
+                append(nameResolver.getString(signature.getName()))
+
+                append("(")
+                for (type in signature.getParameterTypeList()) {
+                    appendType(type)
+                }
+                append(")")
+
+                if (!signature.hasReturnType()) {
+                    throw KotlinReflectionInternalError("Incorrect metadata for return type of $function")
+                }
+                appendType(signature.getReturnType())
+            }.toString()
+        }
+        else if (function is JavaMethodDescriptor) {
+            val method = (function.getSource() as? JavaSourceElement)?.javaElement as? JavaMethod ?:
+                         throw KotlinReflectionInternalError("Incorrect resolution sequence for Java method $function")
+
+            return StringBuilder {
+                fun appendType(type: JavaType) {
+                    when (type) {
+                        is JavaPrimitiveType -> append(when (type.getType()) {
+                            null -> "V"
+                            PrimitiveType.BOOLEAN -> "Z"
+                            PrimitiveType.CHAR -> "C"
+                            PrimitiveType.BYTE -> "B"
+                            PrimitiveType.SHORT -> "S"
+                            PrimitiveType.INT -> "I"
+                            PrimitiveType.FLOAT -> "F"
+                            PrimitiveType.LONG -> "J"
+                            PrimitiveType.DOUBLE -> "D"
+                        })
+                        is JavaArrayType -> {
+                            append("[")
+                            appendType(type.getComponentType())
+                        }
+                        is JavaWildcardType -> {
+                            // TODO: verify
+                            val bound = type.getBound()
+                            if (bound != null && type.isExtends()) appendType(bound)
+                            else append("Ljava/lang/Object;")
+                        }
+                        is JavaClassifierType -> {
+                            val classifier = type.getClassifier()
+                            when (classifier) {
+                                is ReflectJavaClass ->
+                                    append(classifier.element.desc)
+                                is ReflectJavaTypeParameter ->
+                                    appendType(ReflectJavaType.create(classifier.typeVariable.getBounds().first()))
+                            }
+                        }
+                    }
+                }
+
+                append(method.getName().asString())
+
+                append("(")
+                for (parameter in method.getValueParameters()) {
+                    appendType(parameter.getType())
+                }
+                append(")")
+
+                appendType(method.getReturnType()!!)
+            }.toString()
+        }
+        else throw KotlinReflectionInternalError("Unknown origin of $function (${function.javaClass})")
     }
 
     fun mapJvmClassToKotlinClassId(klass: Class<*>): ClassId {

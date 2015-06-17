@@ -16,6 +16,7 @@
 
 package kotlin.reflect.jvm.internal
 
+import org.jetbrains.kotlin.descriptors.FunctionDescriptor
 import org.jetbrains.kotlin.descriptors.PropertyDescriptor
 import org.jetbrains.kotlin.load.java.structure.reflect.classId
 import org.jetbrains.kotlin.load.java.structure.reflect.classLoader
@@ -63,6 +64,25 @@ abstract class KCallableContainerImpl : KDeclarationContainer {
         }
 
         return properties.single() as PropertyDescriptor
+    }
+
+    fun findFunctionDescriptor(signature: String): FunctionDescriptor {
+        val (name, parameters, returnType) = signature.splitBy("(", ")")
+
+        // TODO: don't always call Name.identifier here, the string may be malformed
+
+        val functions = scope
+                .getFunctions(Name.identifier(name))
+                .filter { descriptor ->
+                    // TODO
+                    true
+                }
+
+        if (functions.size() != 1) {
+            throw KotlinReflectionInternalError("Function name $name is not unique in class $jClass, this is not yet supported")
+        }
+
+        return functions.single()
     }
 
     // TODO: check resulting method's return type
