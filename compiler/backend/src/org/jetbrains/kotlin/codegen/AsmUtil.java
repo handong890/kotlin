@@ -315,8 +315,16 @@ public class AsmUtil {
         if (isEnumEntry(memberDescriptor)) {
             return NO_FLAG_PACKAGE_PRIVATE;
         }
-        if (memberDescriptor instanceof ConstructorDescriptor && isAnonymousObject(memberDescriptor.getContainingDeclaration())) {
-            return NO_FLAG_PACKAGE_PRIVATE;
+        if (memberDescriptor instanceof ConstructorDescriptor) {
+            if (isAnonymousObject(memberDescriptor.getContainingDeclaration())) {
+                return NO_FLAG_PACKAGE_PRIVATE;
+            }
+            if (containingDeclaration instanceof ClassDescriptor) {
+                ClassDescriptor containingClass = (ClassDescriptor) containingDeclaration;
+                if (containingClass.getModality() == Modality.SEALED) {
+                    return ACC_PRIVATE;
+                }
+            }
         }
         if (!Visibilities.isPrivate(memberVisibility)) {
             return null;
