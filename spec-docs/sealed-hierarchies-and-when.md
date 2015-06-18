@@ -62,4 +62,17 @@ when (type) {
 
 However, class with a private constructor can also be derived as a local class, that provides a problem for this option implementation.
 
+## Future When Optimization
 
+It's possible to optimize when on sealed in the way like when on enum or when on string. 
+There are the following opportunities, all of them use `KSealed` interface with some `final` identification method:
+
+* use `ordinal()` method, which is implemented like enums, so the first descendant has an ordinal 0, 
+second 1 and so on. When on sealed organized like when on enum. Drawback: reordering breaks client's code.
+* use `sealedName()` method returning a fully qualified class name of a direct sealed descendant.
+When on sealed organized like when on string. Drawback: extra efforts.
+* use `sealedId()` method returning a hash code of a direct sealed descendant fully qualified class name.
+Drawbacks: possible collisions, including an opportunity to rename some member and get hash code of another member,
+which breaks client's code in a dramatic way.
+
+After optimization, `instanceof KSealed` should be checked at run-time before applying it.
