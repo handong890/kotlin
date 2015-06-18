@@ -277,6 +277,28 @@ public class BlackBoxWithJavaCodegenTestGenerated extends AbstractBlackBoxCodege
 
     }
 
+    @TestMetadata("compiler/testData/codegen/boxWithJava/sealed")
+    @TestDataPath("$PROJECT_ROOT")
+    @RunWith(JUnit3RunnerWithInners.class)
+    public static class Sealed extends AbstractBlackBoxCodegenTest {
+        public void testAllFilesPresentInSealed() throws Exception {
+            JetTestUtils.assertAllTestsPresentByMetadata(this.getClass(), new File("compiler/testData/codegen/boxWithJava/sealed"), Pattern.compile("^([^\\.]+)$"), true);
+        }
+
+        @TestMetadata("derived")
+        public void testDerived() throws Exception {
+            String fileName = JetTestUtils.navigationMetadata("compiler/testData/codegen/boxWithJava/sealed/derived/");
+            doTestWithJava(fileName);
+        }
+
+        @TestMetadata("instance")
+        public void testInstance() throws Exception {
+            String fileName = JetTestUtils.navigationMetadata("compiler/testData/codegen/boxWithJava/sealed/instance/");
+            doTestWithJava(fileName);
+        }
+
+    }
+
     @TestMetadata("compiler/testData/codegen/boxWithJava/secondaryConstructors")
     @TestDataPath("$PROJECT_ROOT")
     @RunWith(JUnit3RunnerWithInners.class)

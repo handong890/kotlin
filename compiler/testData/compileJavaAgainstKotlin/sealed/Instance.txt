@@ -1,0 +1,20 @@
+package test
+
+public open class Instance {
+    public constructor Instance()
+
+    // Static members
+    public/*package*/ open fun create(): test.Season!
+}
+
+public abstract class Season {
+    public constructor Season()
+
+    internal final class Cold : test.Season {
+        public constructor Cold()
+    }
+
+    internal final class Warm : test.Season {
+        public constructor Warm()
+    }
+}
