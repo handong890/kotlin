@@ -17,22 +17,21 @@
 package org.jetbrains.kotlin.idea.intentions.branchedTransformations
 
 import com.intellij.openapi.editor.Editor
-import com.intellij.psi.PsiElement
 import com.intellij.psi.search.LocalSearchScope
 import com.intellij.psi.search.searches.ReferencesSearch
 import org.jetbrains.kotlin.JetNodeTypes
 import org.jetbrains.kotlin.descriptors.VariableDescriptor
 import org.jetbrains.kotlin.idea.caches.resolve.analyze
+import org.jetbrains.kotlin.idea.core.replaced
 import org.jetbrains.kotlin.idea.refactoring.inline.KotlinInlineValHandler
 import org.jetbrains.kotlin.idea.refactoring.introduce.introduceVariable.KotlinIntroduceVariableHandler
 import org.jetbrains.kotlin.lexer.JetTokens
 import org.jetbrains.kotlin.psi.*
-import org.jetbrains.kotlin.idea.core.replaced
 import org.jetbrains.kotlin.resolve.BindingContext
 import org.jetbrains.kotlin.resolve.BindingContextUtils
 import org.jetbrains.kotlin.resolve.DescriptorUtils
-import org.jetbrains.kotlin.resolve.bindingContextUtil.isUsedAsStatement
 import org.jetbrains.kotlin.resolve.calls.smartcasts.DataFlowValueFactory
+import org.jetbrains.kotlin.resolve.lazy.BodyResolveMode
 
 val NULL_PTR_EXCEPTION_FQ = "java.lang.NullPointerException"
 val KOTLIN_NULL_PTR_EXCEPTION_FQ = "kotlin.KotlinNullPointerException"
@@ -133,7 +132,7 @@ fun JetPostfixExpression.inlineBaseExpressionIfApplicableWithPrompt(editor: Edit
 }
 
 fun JetExpression.isStableVariable(): Boolean {
-    val context = this.analyze()
+    val context = this.analyze(bodyResolveMode = BodyResolveMode.PARTIAL)
     val descriptor = BindingContextUtils.extractVariableDescriptorIfAny(context, this, false)
     return descriptor is VariableDescriptor &&
            DataFlowValueFactory.isStableVariable(descriptor, DescriptorUtils.getContainingModule(descriptor))
