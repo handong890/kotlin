@@ -28,6 +28,7 @@ import org.jetbrains.kotlin.resolve.BindingTrace;
 import org.jetbrains.kotlin.resolve.AdditionalCheckerProvider;
 import org.jetbrains.kotlin.resolve.validation.SymbolUsageValidator;
 import org.jetbrains.kotlin.types.DynamicTypesSettings;
+import org.jetbrains.kotlin.resolve.ResolveTaskManager;
 import org.jetbrains.kotlin.resolve.LazyTopDownAnalyzerForTopLevel;
 import org.jetbrains.kotlin.resolve.LazyTopDownAnalyzer;
 import org.jetbrains.kotlin.resolve.BodyResolver;
@@ -85,6 +86,7 @@ public class InjectorForLazyBodyResolve {
     private final AdditionalCheckerProvider additionalCheckerProvider;
     private final SymbolUsageValidator symbolUsageValidator;
     private final DynamicTypesSettings dynamicTypesSettings;
+    private final ResolveTaskManager resolveTaskManager;
     private final LazyTopDownAnalyzerForTopLevel lazyTopDownAnalyzerForTopLevel;
     private final LazyTopDownAnalyzer lazyTopDownAnalyzer;
     private final BodyResolver bodyResolver;
@@ -130,7 +132,8 @@ public class InjectorForLazyBodyResolve {
         @NotNull FileScopeProvider fileScopeProvider,
         @NotNull BindingTrace bindingTrace,
         @NotNull AdditionalCheckerProvider additionalCheckerProvider,
-        @NotNull DynamicTypesSettings dynamicTypesSettings
+        @NotNull DynamicTypesSettings dynamicTypesSettings,
+        @NotNull ResolveTaskManager resolveTaskManager
     ) {
         this.moduleContext = moduleContext;
         this.kotlinBuiltIns = moduleContext.getBuiltIns();
@@ -144,6 +147,7 @@ public class InjectorForLazyBodyResolve {
         this.additionalCheckerProvider = additionalCheckerProvider;
         this.symbolUsageValidator = additionalCheckerProvider.getSymbolUsageValidator();
         this.dynamicTypesSettings = dynamicTypesSettings;
+        this.resolveTaskManager = resolveTaskManager;
         this.lazyTopDownAnalyzerForTopLevel = new LazyTopDownAnalyzerForTopLevel();
         this.lazyTopDownAnalyzer = new LazyTopDownAnalyzer();
         this.bodyResolver = new BodyResolver();
@@ -206,6 +210,7 @@ public class InjectorForLazyBodyResolve {
         bodyResolver.setDelegatedPropertyResolver(delegatedPropertyResolver);
         bodyResolver.setExpressionTypingServices(expressionTypingServices);
         bodyResolver.setFunctionAnalyzerExtension(functionAnalyzerExtension);
+        bodyResolver.setResolveTaskManager(resolveTaskManager);
         bodyResolver.setScriptBodyResolverResolver(scriptBodyResolver);
         bodyResolver.setTrace(bindingTrace);
         bodyResolver.setValueParameterResolver(valueParameterResolver);

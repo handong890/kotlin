@@ -28,6 +28,7 @@ import org.jetbrains.kotlin.resolve.validation.SymbolUsageValidator;
 import org.jetbrains.kotlin.types.DynamicTypesSettings;
 import org.jetbrains.kotlin.types.expressions.LocalClassDescriptorHolder;
 import org.jetbrains.kotlin.resolve.LazyTopDownAnalyzer;
+import org.jetbrains.kotlin.resolve.DummyResolveManager;
 import org.jetbrains.kotlin.resolve.lazy.NoTopLevelDescriptorProvider;
 import org.jetbrains.kotlin.resolve.lazy.NoFileScopeProvider;
 import org.jetbrains.kotlin.types.expressions.DeclarationScopeProviderForLocalClassifierAnalyzer;
@@ -85,6 +86,7 @@ public class InjectorForLazyLocalClassifierAnalyzer {
     private final DynamicTypesSettings dynamicTypesSettings;
     private final LocalClassDescriptorHolder localClassDescriptorHolder;
     private final LazyTopDownAnalyzer lazyTopDownAnalyzer;
+    private final DummyResolveManager dummyResolveManager;
     private final NoTopLevelDescriptorProvider noTopLevelDescriptorProvider;
     private final NoFileScopeProvider noFileScopeProvider;
     private final DeclarationScopeProviderForLocalClassifierAnalyzer declarationScopeProviderForLocalClassifierAnalyzer;
@@ -143,6 +145,7 @@ public class InjectorForLazyLocalClassifierAnalyzer {
         this.dynamicTypesSettings = dynamicTypesSettings;
         this.localClassDescriptorHolder = localClassDescriptorHolder;
         this.lazyTopDownAnalyzer = new LazyTopDownAnalyzer();
+        this.dummyResolveManager = new DummyResolveManager();
         this.noTopLevelDescriptorProvider = NoTopLevelDescriptorProvider.INSTANCE$;
         this.noFileScopeProvider = NoFileScopeProvider.INSTANCE$;
         this.localLazyDeclarationResolver = new LocalLazyDeclarationResolver(moduleContext, bindingTrace, localClassDescriptorHolder);
@@ -207,6 +210,7 @@ public class InjectorForLazyLocalClassifierAnalyzer {
         bodyResolver.setDelegatedPropertyResolver(delegatedPropertyResolver);
         bodyResolver.setExpressionTypingServices(expressionTypingServices);
         bodyResolver.setFunctionAnalyzerExtension(functionAnalyzerExtension);
+        bodyResolver.setResolveTaskManager(dummyResolveManager);
         bodyResolver.setScriptBodyResolverResolver(scriptBodyResolver);
         bodyResolver.setTrace(bindingTrace);
         bodyResolver.setValueParameterResolver(valueParameterResolver);

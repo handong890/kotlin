@@ -27,6 +27,7 @@ import org.jetbrains.kotlin.resolve.lazy.declarations.DeclarationProviderFactory
 import org.jetbrains.kotlin.resolve.lazy.ResolveSession;
 import org.jetbrains.kotlin.resolve.lazy.ScopeProvider;
 import org.jetbrains.kotlin.resolve.LazyTopDownAnalyzerForTopLevel;
+import org.jetbrains.kotlin.resolve.DummyResolveManager;
 import org.jetbrains.kotlin.js.resolve.KotlinJsCheckerProvider;
 import org.jetbrains.kotlin.resolve.validation.SymbolUsageValidator;
 import org.jetbrains.kotlin.types.DynamicTypesAllowed;
@@ -87,6 +88,7 @@ public class InjectorForTopDownAnalyzerForJs {
     private final ResolveSession resolveSession;
     private final ScopeProvider scopeProvider;
     private final LazyTopDownAnalyzerForTopLevel lazyTopDownAnalyzerForTopLevel;
+    private final DummyResolveManager dummyResolveManager;
     private final KotlinJsCheckerProvider kotlinJsCheckerProvider;
     private final SymbolUsageValidator symbolUsageValidator;
     private final DynamicTypesAllowed dynamicTypesAllowed;
@@ -146,6 +148,7 @@ public class InjectorForTopDownAnalyzerForJs {
         this.resolveSession = new ResolveSession(project, getModuleContext(), moduleDescriptor, declarationProviderFactory, bindingTrace);
         this.scopeProvider = new ScopeProvider(getResolveSession());
         this.lazyTopDownAnalyzerForTopLevel = new LazyTopDownAnalyzerForTopLevel();
+        this.dummyResolveManager = new DummyResolveManager();
         this.kotlinJsCheckerProvider = KotlinJsCheckerProvider.INSTANCE$;
         this.symbolUsageValidator = kotlinJsCheckerProvider.getSymbolUsageValidator();
         this.dynamicTypesAllowed = new DynamicTypesAllowed();
@@ -295,6 +298,7 @@ public class InjectorForTopDownAnalyzerForJs {
         bodyResolver.setDelegatedPropertyResolver(delegatedPropertyResolver);
         bodyResolver.setExpressionTypingServices(expressionTypingServices);
         bodyResolver.setFunctionAnalyzerExtension(functionAnalyzerExtension);
+        bodyResolver.setResolveTaskManager(dummyResolveManager);
         bodyResolver.setScriptBodyResolverResolver(scriptBodyResolver);
         bodyResolver.setTrace(bindingTrace);
         bodyResolver.setValueParameterResolver(valueParameterResolver);

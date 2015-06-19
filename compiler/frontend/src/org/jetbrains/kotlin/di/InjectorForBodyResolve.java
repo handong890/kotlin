@@ -26,7 +26,9 @@ import org.jetbrains.kotlin.resolve.BindingTrace;
 import org.jetbrains.kotlin.resolve.AdditionalCheckerProvider;
 import org.jetbrains.kotlin.resolve.validation.SymbolUsageValidator;
 import org.jetbrains.kotlin.resolve.StatementFilter;
+import org.jetbrains.kotlin.types.DynamicTypesSettings;
 import org.jetbrains.kotlin.resolve.BodyResolver;
+import org.jetbrains.kotlin.resolve.DummyResolveManager;
 import org.jetbrains.kotlin.resolve.AnnotationResolver;
 import org.jetbrains.kotlin.resolve.calls.CallResolver;
 import org.jetbrains.kotlin.resolve.calls.ArgumentTypeResolver;
@@ -40,7 +42,6 @@ import org.jetbrains.kotlin.resolve.TypeResolver;
 import org.jetbrains.kotlin.resolve.QualifiedExpressionResolver;
 import org.jetbrains.kotlin.resolve.TypeResolver.FlexibleTypeCapabilitiesProvider;
 import org.jetbrains.kotlin.context.TypeLazinessToken;
-import org.jetbrains.kotlin.types.DynamicTypesSettings;
 import org.jetbrains.kotlin.types.expressions.ForLoopConventionsChecker;
 import org.jetbrains.kotlin.types.expressions.FakeCallResolver;
 import org.jetbrains.kotlin.resolve.FunctionDescriptorResolver;
@@ -73,7 +74,9 @@ public class InjectorForBodyResolve {
     private final AdditionalCheckerProvider additionalCheckerProvider;
     private final SymbolUsageValidator symbolUsageValidator;
     private final StatementFilter statementFilter;
+    private final DynamicTypesSettings dynamicTypesSettings;
     private final BodyResolver bodyResolver;
+    private final DummyResolveManager dummyResolveManager;
     private final AnnotationResolver annotationResolver;
     private final CallResolver callResolver;
     private final ArgumentTypeResolver argumentTypeResolver;
@@ -87,7 +90,6 @@ public class InjectorForBodyResolve {
     private final QualifiedExpressionResolver qualifiedExpressionResolver;
     private final FlexibleTypeCapabilitiesProvider flexibleTypeCapabilitiesProvider;
     private final TypeLazinessToken typeLazinessToken;
-    private final DynamicTypesSettings dynamicTypesSettings;
     private final ForLoopConventionsChecker forLoopConventionsChecker;
     private final FakeCallResolver fakeCallResolver;
     private final FunctionDescriptorResolver functionDescriptorResolver;
@@ -108,7 +110,8 @@ public class InjectorForBodyResolve {
         @NotNull ModuleContext moduleContext,
         @NotNull BindingTrace bindingTrace,
         @NotNull AdditionalCheckerProvider additionalCheckerProvider,
-        @NotNull StatementFilter statementFilter
+        @NotNull StatementFilter statementFilter,
+        @NotNull DynamicTypesSettings dynamicTypesSettings
     ) {
         this.moduleContext = moduleContext;
         this.kotlinBuiltIns = moduleContext.getBuiltIns();
@@ -120,7 +123,9 @@ public class InjectorForBodyResolve {
         this.additionalCheckerProvider = additionalCheckerProvider;
         this.symbolUsageValidator = additionalCheckerProvider.getSymbolUsageValidator();
         this.statementFilter = statementFilter;
+        this.dynamicTypesSettings = dynamicTypesSettings;
         this.bodyResolver = new BodyResolver();
+        this.dummyResolveManager = new DummyResolveManager();
         this.annotationResolver = new AnnotationResolver();
         this.callResolver = new CallResolver();
         this.argumentTypeResolver = new ArgumentTypeResolver();
@@ -133,7 +138,6 @@ public class InjectorForBodyResolve {
         this.qualifiedExpressionResolver = new QualifiedExpressionResolver();
         this.flexibleTypeCapabilitiesProvider = new FlexibleTypeCapabilitiesProvider();
         this.typeLazinessToken = new TypeLazinessToken();
-        this.dynamicTypesSettings = new DynamicTypesSettings();
         this.typeResolver = new TypeResolver(annotationResolver, qualifiedExpressionResolver, moduleDescriptor, flexibleTypeCapabilitiesProvider, storageManager, typeLazinessToken, dynamicTypesSettings);
         this.forLoopConventionsChecker = new ForLoopConventionsChecker();
         this.fakeCallResolver = new FakeCallResolver(project, callResolver);
@@ -159,6 +163,7 @@ public class InjectorForBodyResolve {
         this.bodyResolver.setDelegatedPropertyResolver(delegatedPropertyResolver);
         this.bodyResolver.setExpressionTypingServices(expressionTypingServices);
         this.bodyResolver.setFunctionAnalyzerExtension(functionAnalyzerExtension);
+        this.bodyResolver.setResolveTaskManager(dummyResolveManager);
         this.bodyResolver.setScriptBodyResolverResolver(scriptBodyResolver);
         this.bodyResolver.setTrace(bindingTrace);
         this.bodyResolver.setValueParameterResolver(valueParameterResolver);

@@ -238,7 +238,8 @@ private object KotlinResolveDataProvider {
                     resolveSession.getScopeProvider(),
                     trace,
                     targetPlatform.getAdditionalCheckerProvider(),
-                    targetPlatform.getDynamicTypesSettings()
+                    targetPlatform.getDynamicTypesSettings(),
+                    resolveSession.getResolveTaskManager()
             ).getLazyTopDownAnalyzerForTopLevel()!!
 
             lazyTopDownAnalyzer.analyzeDeclarations(

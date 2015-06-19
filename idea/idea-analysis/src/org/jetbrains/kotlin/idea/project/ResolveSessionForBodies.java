@@ -21,12 +21,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.ReadOnly;
 import org.jetbrains.kotlin.descriptors.*;
+import org.jetbrains.kotlin.idea.caches.resolve.IDEResolveTaskManager;
 import org.jetbrains.kotlin.name.FqName;
 import org.jetbrains.kotlin.psi.*;
 import org.jetbrains.kotlin.psi.psiUtil.PsiUtilPackage;
 import org.jetbrains.kotlin.resolve.BindingContext;
 import org.jetbrains.kotlin.resolve.BindingContextUtils;
 import org.jetbrains.kotlin.resolve.QualifiedExpressionResolver;
+import org.jetbrains.kotlin.resolve.ResolveTaskManager;
 import org.jetbrains.kotlin.resolve.lazy.BodyResolveMode;
 import org.jetbrains.kotlin.resolve.lazy.KotlinCodeAnalyzer;
 import org.jetbrains.kotlin.resolve.lazy.ResolveSession;
@@ -40,16 +42,18 @@ import java.util.Collection;
 public class ResolveSessionForBodies implements KotlinCodeAnalyzer {
     private final Object createdForObject;
     private final ResolveSession resolveSession;
+    private final IDEResolveTaskManager resolveTaskManager;
     private final ResolveElementCache resolveElementCache;
 
-    public ResolveSessionForBodies(@NotNull Project project, @NotNull ResolveSession resolveSession) {
-        this(project, project, resolveSession);
+    public ResolveSessionForBodies(@NotNull Project project, @NotNull ResolveSession resolveSession, @NotNull IDEResolveTaskManager resolveTaskManager) {
+        this(project, project, resolveSession, resolveTaskManager);
     }
 
-    private ResolveSessionForBodies(Object createdForObject, Project project, ResolveSession resolveSession) {
+    private ResolveSessionForBodies(Object createdForObject, Project project, ResolveSession resolveSession, @NotNull IDEResolveTaskManager resolveTaskManager) {
         this.createdForObject = createdForObject;
         this.resolveSession = resolveSession;
-        this.resolveElementCache = new ResolveElementCache(resolveSession, project);
+        this.resolveTaskManager = resolveTaskManager;
+        this.resolveElementCache = new ResolveElementCache(resolveSession, project, resolveTaskManager);
     }
 
     @NotNull
@@ -132,6 +136,11 @@ public class ResolveSessionForBodies implements KotlinCodeAnalyzer {
     @NotNull
     public ExceptionTracker getExceptionTracker() {
         return resolveSession.getExceptionTracker();
+    }
+
+    @NotNull
+    public ResolveTaskManager getResolveTaskManager() {
+        return resolveTaskManager;
     }
 
     @NotNull

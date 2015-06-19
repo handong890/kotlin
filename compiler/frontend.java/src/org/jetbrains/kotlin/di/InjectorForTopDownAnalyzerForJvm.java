@@ -45,6 +45,7 @@ import org.jetbrains.kotlin.resolve.jvm.JavaLazyAnalyzerPostConstruct;
 import org.jetbrains.kotlin.load.java.JavaFlexibleTypeCapabilitiesProvider;
 import org.jetbrains.kotlin.load.kotlin.KotlinJvmCheckerProvider;
 import org.jetbrains.kotlin.resolve.validation.SymbolUsageValidator;
+import org.jetbrains.kotlin.resolve.DummyResolveManager;
 import org.jetbrains.kotlin.resolve.AnnotationResolver;
 import org.jetbrains.kotlin.resolve.calls.CallResolver;
 import org.jetbrains.kotlin.resolve.calls.ArgumentTypeResolver;
@@ -124,6 +125,7 @@ public class InjectorForTopDownAnalyzerForJvm {
     private final JavaFlexibleTypeCapabilitiesProvider javaFlexibleTypeCapabilitiesProvider;
     private final KotlinJvmCheckerProvider kotlinJvmCheckerProvider;
     private final SymbolUsageValidator symbolUsageValidator;
+    private final DummyResolveManager dummyResolveManager;
     private final AnnotationResolver annotationResolver;
     private final CallResolver callResolver;
     private final ArgumentTypeResolver argumentTypeResolver;
@@ -209,6 +211,7 @@ public class InjectorForTopDownAnalyzerForJvm {
         this.javaFlexibleTypeCapabilitiesProvider = new JavaFlexibleTypeCapabilitiesProvider();
         this.kotlinJvmCheckerProvider = KotlinJvmCheckerProvider.INSTANCE$;
         this.symbolUsageValidator = kotlinJvmCheckerProvider.getSymbolUsageValidator();
+        this.dummyResolveManager = new DummyResolveManager();
         this.annotationResolver = new AnnotationResolver();
         this.callResolver = new CallResolver();
         this.argumentTypeResolver = new ArgumentTypeResolver();
@@ -371,6 +374,7 @@ public class InjectorForTopDownAnalyzerForJvm {
         bodyResolver.setDelegatedPropertyResolver(delegatedPropertyResolver);
         bodyResolver.setExpressionTypingServices(expressionTypingServices);
         bodyResolver.setFunctionAnalyzerExtension(functionAnalyzerExtension);
+        bodyResolver.setResolveTaskManager(dummyResolveManager);
         bodyResolver.setScriptBodyResolverResolver(scriptBodyResolver);
         bodyResolver.setTrace(bindingTrace);
         bodyResolver.setValueParameterResolver(valueParameterResolver);
