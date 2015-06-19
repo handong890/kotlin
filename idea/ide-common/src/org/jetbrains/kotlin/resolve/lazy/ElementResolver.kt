@@ -292,7 +292,7 @@ public abstract class ElementResolver protected constructor(
         ForceResolveUtil.forceResolveAllContents(descriptor.getTypeConstructor().getSupertypes())
 
         val bodyResolver = createBodyResolver(resolveSession, trace, file, StatementFilter.NONE)
-        bodyResolver.resolveDelegationSpecifierList(createEmptyContext(),
+        bodyResolver.resolveDelegationSpecifierList(DataFlowInfo.EMPTY,
                                                     classOrObject,
                                                     descriptor,
                                                     descriptor.getUnsubstitutedPrimaryConstructor(),
@@ -303,25 +303,26 @@ public abstract class ElementResolver protected constructor(
     private fun propertyAdditionalResolve(resolveSession: ResolveSession, jetProperty: JetProperty, trace: BindingTrace, file: JetFile, statementFilter: StatementFilter) {
         val propertyResolutionScope = resolveSession.getScopeProvider().getResolutionScopeForDeclaration(jetProperty)
 
-        val bodyResolveContext = BodyResolveContextForLazy(TopDownAnalysisMode.LocalDeclarations, object : Function<JetDeclaration, JetScope> {
-            override fun apply(declaration: JetDeclaration?): JetScope? {
-                assert(declaration!!.getParent() == jetProperty) { "Must be called only for property accessors, but called for " + declaration }
-                return resolveSession.getScopeProvider().getResolutionScopeForDeclaration(declaration)
-            }
-        })
         val bodyResolver = createBodyResolver(resolveSession, trace, file, statementFilter)
         val descriptor = resolveSession.resolveToDescriptor(jetProperty) as PropertyDescriptor
         ForceResolveUtil.forceResolveAllContents(descriptor)
 
         val propertyInitializer = jetProperty.getInitializer()
         if (propertyInitializer != null) {
-            bodyResolver.resolvePropertyInitializer(bodyResolveContext, jetProperty, descriptor, propertyInitializer, propertyResolutionScope)
+            bodyResolver.resolvePropertyInitializer(DataFlowInfo.EMPTY, jetProperty, descriptor, propertyInitializer, propertyResolutionScope)
         }
 
         val propertyDelegate = jetProperty.getDelegateExpression()
         if (propertyDelegate != null) {
-            bodyResolver.resolvePropertyDelegate(bodyResolveContext, jetProperty, descriptor, propertyDelegate, propertyResolutionScope, propertyResolutionScope)
+            bodyResolver.resolvePropertyDelegate(DataFlowInfo.EMPTY, jetProperty, descriptor, propertyDelegate, propertyResolutionScope, propertyResolutionScope)
         }
+
+        val bodyResolveContext = BodyResolveContextForLazy(TopDownAnalysisMode.LocalDeclarations, object : Function<JetDeclaration, JetScope> {
+            override fun apply(declaration: JetDeclaration?): JetScope? {
+                assert(declaration!!.getParent() == jetProperty) { "Must be called only for property accessors, but called for " + declaration }
+                return resolveSession.getScopeProvider().getResolutionScopeForDeclaration(declaration)
+            }
+        })
 
         bodyResolver.resolvePropertyAccessors(bodyResolveContext, jetProperty, descriptor)
 
@@ -336,7 +337,7 @@ public abstract class ElementResolver protected constructor(
         ForceResolveUtil.forceResolveAllContents(functionDescriptor)
 
         val bodyResolver = createBodyResolver(resolveSession, trace, file, statementFilter)
-        bodyResolver.resolveFunctionBody(createEmptyContext(), trace, namedFunction, functionDescriptor, scope)
+        bodyResolver.resolveFunctionBody(DataFlowInfo.EMPTY, trace, namedFunction, functionDescriptor, scope)
     }
 
     private fun secondaryConstructorAdditionalResolve(resolveSession: ResolveSession, constructor: JetSecondaryConstructor, trace: BindingTrace, file: JetFile, statementFilter: StatementFilter) {
@@ -345,7 +346,7 @@ public abstract class ElementResolver protected constructor(
         ForceResolveUtil.forceResolveAllContents(constructorDescriptor)
 
         val bodyResolver = createBodyResolver(resolveSession, trace, file, statementFilter)
-        bodyResolver.resolveSecondaryConstructorBody(createEmptyContext(), trace, constructor, constructorDescriptor, scope)
+        bodyResolver.resolveSecondaryConstructorBody(DataFlowInfo.EMPTY, trace, constructor, constructorDescriptor, scope)
     }
 
     private fun constructorAdditionalResolve(resolveSession: ResolveSession, klass: JetClass, trace: BindingTrace, file: JetFile, statementFilter: StatementFilter) {
@@ -356,7 +357,7 @@ public abstract class ElementResolver protected constructor(
                                     ?: error("Can't get primary constructor for descriptor '$classDescriptor' in from class '${klass.getElementTextWithContext()}'")
 
         val bodyResolver = createBodyResolver(resolveSession, trace, file, statementFilter)
-        bodyResolver.resolveConstructorParameterDefaultValuesAndAnnotations(createEmptyContext(), trace, klass, constructorDescriptor, scope)
+        bodyResolver.resolveConstructorParameterDefaultValuesAndAnnotations(DataFlowInfo.EMPTY, trace, klass, constructorDescriptor, scope)
     }
 
     private fun initializerAdditionalResolve(resolveSession: ResolveSession, classInitializer: JetClassInitializer, trace: BindingTrace, file: JetFile, statementFilter: StatementFilter) {
@@ -364,7 +365,7 @@ public abstract class ElementResolver protected constructor(
         val classOrObjectDescriptor = resolveSession.resolveToDescriptor(classOrObject) as LazyClassDescriptor
 
         val bodyResolver = createBodyResolver(resolveSession, trace, file, statementFilter)
-        bodyResolver.resolveAnonymousInitializer(createEmptyContext(), classInitializer, classOrObjectDescriptor)
+        bodyResolver.resolveAnonymousInitializer(DataFlowInfo.EMPTY, classInitializer, classOrObjectDescriptor)
     }
 
     private fun createBodyResolver(resolveSession: ResolveSession, trace: BindingTrace, file: JetFile, statementFilter: StatementFilter): BodyResolver {
@@ -374,10 +375,6 @@ public abstract class ElementResolver protected constructor(
                 trace, getAdditionalCheckerProvider(file), statementFilter
         )
         return bodyResolve.getBodyResolver()
-    }
-
-    private fun createEmptyContext(): BodyResolveContextForLazy {
-        return BodyResolveContextForLazy(TopDownAnalysisMode.LocalDeclarations, Functions.constant<JetScope>(null))
     }
 
     private fun getExpressionResolutionScope(resolveSession: ResolveSession, expression: JetExpression): JetScope {
