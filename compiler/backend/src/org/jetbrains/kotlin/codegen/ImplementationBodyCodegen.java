@@ -1498,7 +1498,8 @@ public class ImplementationBodyCodegen extends ClassBodyCodegen {
         }
 
         codegen.invokeMethodWithArguments(
-                delegateConstructorCallable, delegationConstructorCall, StackValue.none(), codegen.defaultCallGenerator, argumentGenerator);
+                delegateConstructorCallable, delegationConstructorCall, StackValue.none(),
+                codegen.defaultCallGenerator, argumentGenerator, true);
     }
 
     private boolean isSameClassConstructor(@Nullable ConstructorDescriptor delegatingConstructor) {

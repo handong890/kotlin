@@ -739,16 +739,23 @@ public class FunctionCodegen {
     }
 
     private static boolean isDefaultNeeded(FunctionDescriptor functionDescriptor) {
-        boolean needed = false;
         if (functionDescriptor != null) {
             for (ValueParameterDescriptor parameterDescriptor : functionDescriptor.getValueParameters()) {
                 if (parameterDescriptor.declaresDefaultValue()) {
-                    needed = true;
-                    break;
+                    return true;
+                }
+            }
+            // We create a "synthetic" method also for a private constructor, but not for an object
+            // TODO: it's probably better to encapsulate this place into a function
+            if (functionDescriptor instanceof ConstructorDescriptor) {
+                ConstructorDescriptor constructorDescriptor = (ConstructorDescriptor) functionDescriptor;
+                if (!DescriptorUtils.isObject(constructorDescriptor.getContainingDeclaration())
+                    && AsmUtil.getVisibilityAccessFlag(functionDescriptor) == ACC_PRIVATE) {
+                    return true;
                 }
             }
         }
-        return needed;
+        return false;
     }
 
     private void generateBridge(

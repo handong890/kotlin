@@ -2352,7 +2352,7 @@ public class ExpressionCodegen extends JetVisitor<StackValue, StackValue> implem
         ArgumentGenerator argumentGenerator = new CallBasedArgumentGenerator(this, callGenerator, descriptor.getValueParameters(),
                                                                              callableMethod.getValueParameterTypes());
 
-        invokeMethodWithArguments(callableMethod, resolvedCall, receiver, callGenerator, argumentGenerator);
+        invokeMethodWithArguments(callableMethod, resolvedCall, receiver, callGenerator, argumentGenerator, false);
     }
 
     public void invokeMethodWithArguments(
@@ -2360,7 +2360,8 @@ public class ExpressionCodegen extends JetVisitor<StackValue, StackValue> implem
             @NotNull ResolvedCall<?> resolvedCall,
             @NotNull StackValue receiver,
             @NotNull CallGenerator callGenerator,
-            @NotNull ArgumentGenerator argumentGenerator
+            @NotNull ArgumentGenerator argumentGenerator,
+            boolean alwaysCallPrivateConstructorAsDefault
     ) {
         callableMethod.beforeParameterGeneration(v, null);
 
@@ -2394,7 +2395,16 @@ public class ExpressionCodegen extends JetVisitor<StackValue, StackValue> implem
             callGenerator.putValueIfNeeded(null, Type.INT_TYPE, StackValue.constant(mask, Type.INT_TYPE));
         }
 
-        callGenerator.genCall(callableMethod, resolvedCall, !masks.isEmpty(), this);
+        boolean callDefault = !masks.isEmpty();
+        if (!callDefault && alwaysCallPrivateConstructorAsDefault && resolvedCall.getResultingDescriptor() instanceof ConstructorDescriptor) {
+            ConstructorDescriptor constructorDescriptor = (ConstructorDescriptor) resolvedCall.getResultingDescriptor();
+            if (!DescriptorUtils.isObject(constructorDescriptor.getContainingDeclaration())
+                && AsmUtil.getVisibilityAccessFlag(constructorDescriptor) == ACC_PRIVATE) {
+                callDefault = true;
+                // TODO: put some additional masks?
+            }
+        }
+        callGenerator.genCall(callableMethod, resolvedCall, callDefault, this);
     }
 
     @NotNull
