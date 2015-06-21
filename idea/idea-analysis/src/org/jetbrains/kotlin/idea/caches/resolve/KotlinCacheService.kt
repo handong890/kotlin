@@ -73,7 +73,7 @@ public class KotlinCacheService(val project: Project) {
                             ?: GlobalContext(logProcessCanceled)
 
         val moduleResolverProvider = createModuleResolverProvider(
-                platform, project, globalContext, analyzerFacade, syntheticFiles, delegateResolverProvider, moduleFilter
+                project, globalContext, analyzerFacade, syntheticFiles, delegateResolverProvider, moduleFilter
         )
         val allDependencies = dependencies + listOf(moduleResolverProvider.exceptionTracker)
         CachedValueProvider.Result.create(moduleResolverProvider, allDependencies)

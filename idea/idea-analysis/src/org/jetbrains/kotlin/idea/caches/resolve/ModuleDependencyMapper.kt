@@ -26,7 +26,6 @@ import org.jetbrains.kotlin.context.GlobalContextImpl
 import org.jetbrains.kotlin.context.withProject
 import org.jetbrains.kotlin.descriptors.ModuleDescriptor
 import org.jetbrains.kotlin.idea.project.ResolveSessionForBodies
-import org.jetbrains.kotlin.idea.project.TargetPlatform
 import org.jetbrains.kotlin.load.java.structure.JavaClass
 import org.jetbrains.kotlin.load.java.structure.impl.JavaClassImpl
 import org.jetbrains.kotlin.psi.JetFile
@@ -35,7 +34,6 @@ import org.jetbrains.kotlin.storage.ExceptionTracker
 import org.jetbrains.kotlin.utils.keysToMap
 
 fun createModuleResolverProvider(
-        platform: TargetPlatform,
         project: Project,
         globalContext: GlobalContextImpl,
         analyzerFacade: AnalyzerFacade<out ResolverForModule, JvmPlatformParameters>,
@@ -77,7 +75,7 @@ fun createModuleResolverProvider(
         descriptor ->
         globalContext.storageManager.createLazyValue {
             val analyzer = resolverForProject.resolverForModuleDescriptor(descriptor)
-            ResolveSessionForBodies(project, analyzer.lazyResolveSession, IDEResolveTaskManagerImpl(globalContext, project, platform, analyzer.lazyResolveSession))
+            ResolveSessionForBodies(project, analyzer.lazyResolveSession)
         }
     }
     return ModuleResolverProviderImpl(
@@ -113,7 +111,7 @@ private fun collectAllModuleInfosFromIdeaModel(project: Project): List<IdeaModul
     return collectAllModuleInfos
 }
 
-trait ModuleResolverProvider {
+interface ModuleResolverProvider {
     val exceptionTracker: ExceptionTracker
     fun resolverByModule(module: IdeaModuleInfo): ResolverForModule = resolverForProject.resolverForModule(module)
 

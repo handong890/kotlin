@@ -24,51 +24,36 @@ import com.intellij.psi.util.PsiModificationTracker;
 import kotlin.jvm.functions.Function1;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.kotlin.cfg.JetFlowInformationProvider;
-import org.jetbrains.kotlin.idea.caches.resolve.IDEResolveTaskManager;
+import org.jetbrains.kotlin.descriptors.FunctionDescriptor;
 import org.jetbrains.kotlin.idea.stubindex.JetProbablyNothingFunctionShortNameIndex;
 import org.jetbrains.kotlin.idea.stubindex.JetProbablyNothingPropertyShortNameIndex;
 import org.jetbrains.kotlin.psi.JetElement;
 import org.jetbrains.kotlin.psi.JetFile;
 import org.jetbrains.kotlin.psi.JetNamedFunction;
-import org.jetbrains.kotlin.resolve.AdditionalCheckerProvider;
-import org.jetbrains.kotlin.resolve.BindingContext;
-import org.jetbrains.kotlin.resolve.DelegatingBindingTrace;
+import org.jetbrains.kotlin.resolve.*;
+import org.jetbrains.kotlin.resolve.calls.smartcasts.DataFlowInfo;
 import org.jetbrains.kotlin.resolve.lazy.BodyResolveMode;
 import org.jetbrains.kotlin.resolve.lazy.ElementResolver;
 import org.jetbrains.kotlin.resolve.lazy.ProbablyNothingCallableNames;
 import org.jetbrains.kotlin.resolve.lazy.ResolveSession;
+import org.jetbrains.kotlin.resolve.scopes.JetScope;
 import org.jetbrains.kotlin.storage.LazyResolveStorageManager;
 import org.jetbrains.kotlin.storage.MemoizedFunctionToNotNull;
 import org.jetbrains.kotlin.types.DynamicTypesSettings;
 
 import java.util.Collection;
 
-public class ResolveElementCache extends ElementResolver {
+public class ResolveElementCache extends ElementResolver implements ResolveTaskManager {
     private final Project project;
-    private final IDEResolveTaskManager resolveTaskManager;
     private final CachedValue<MemoizedFunctionToNotNull<JetElement, BindingContext>> additionalResolveCache;
 
-    public ResolveElementCache(ResolveSession resolveSession, Project project, final IDEResolveTaskManager resolveTaskManager) {
+    public ResolveElementCache(ResolveSession resolveSession, Project project) {
         super(resolveSession);
         this.project = project;
-        this.resolveTaskManager = resolveTaskManager;
 
         final Function1<JetElement, BindingContext> countCachedTrace = new Function1<JetElement, BindingContext>() {
             @Override
             public BindingContext invoke(JetElement jetElement) {
-                if (jetElement instanceof JetNamedFunction) {
-                    DelegatingBindingTrace bodyResolveTrace =
-                            resolveTaskManager.resolveFunctionBody((JetNamedFunction) jetElement).getResultTrace();
-                    DelegatingBindingTrace trace = new DelegatingBindingTrace(
-                            bodyResolveTrace.getBindingContext(),
-                            "Body resolve trace with JetFlowInformationProvider results");
-
-                    new JetFlowInformationProvider(jetElement, trace).checkDeclaration();
-
-                    return trace.getBindingContext();
-                }
-
                 return performElementAdditionalResolve(jetElement, jetElement, BodyResolveMode.FULL);
             }
         };
@@ -100,10 +85,6 @@ public class ResolveElementCache extends ElementResolver {
 
     @Override
     public boolean hasElementAdditionalResolveCached(@NotNull JetElement jetElement) {
-        if (jetElement instanceof JetNamedFunction) {
-            if (resolveTaskManager.hasElementAdditionalResolveCached((JetNamedFunction) jetElement)) return true;
-        }
-
         if (!additionalResolveCache.hasUpToDateValue()) return false;
         return additionalResolveCache.getValue().isComputed(jetElement);
     }
@@ -137,5 +118,19 @@ public class ResolveElementCache extends ElementResolver {
                 return JetProbablyNothingPropertyShortNameIndex.getInstance().getAllKeys(project);
             }
         };
+    }
+
+    @NotNull
+    @Override
+    public BodyResolveResult resolveFunctionBody(@NotNull JetNamedFunction function) {
+        JetScope declarationScope = getResolveSession().getScopeProvider().getResolutionScopeForDeclaration(function);
+        FunctionDescriptor functionDescriptor = (FunctionDescriptor) getResolveSession().resolveToDescriptor(function);
+
+        BodyResolveContext resolveQueryContext =
+                new BodyResolveContext(DataFlowInfo.EMPTY, getResolveSession().getTrace(), functionDescriptor, declarationScope);
+
+        DelegatingBindingTrace trace = (DelegatingBindingTrace) getElementAdditionalResolve(function);
+
+        return new BodyResolveResult(trace, resolveQueryContext);
     }
 }

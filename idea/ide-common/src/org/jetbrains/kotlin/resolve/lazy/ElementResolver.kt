@@ -355,7 +355,10 @@ public abstract class ElementResolver protected constructor(
         return trace
     }
 
-    private fun functionAdditionalResolve(resolveSession: ResolveSession, namedFunction: JetNamedFunction, file: JetFile, statementFilter: StatementFilter): BindingTrace {
+    private fun functionAdditionalResolve(resolveSession: ResolveSession,
+                                          namedFunction: JetNamedFunction,
+                                          file: JetFile,
+                                          statementFilter: StatementFilter): BindingTrace {
         val profiler = Profiler.create("${if (StatementFilter.NONE != statementFilter) "-------- Partial --------" else ""} ${Thread.currentThread().getName()} " +
                                        "Addition: ${namedFunction.getName()} ${namedFunction.hashCode()} $this " +
                                        "${PsiManager.getInstance(namedFunction.getProject()).getModificationTracker().getModificationCount()}")

@@ -21,7 +21,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.ReadOnly;
 import org.jetbrains.kotlin.descriptors.*;
-import org.jetbrains.kotlin.idea.caches.resolve.IDEResolveTaskManager;
 import org.jetbrains.kotlin.name.FqName;
 import org.jetbrains.kotlin.psi.*;
 import org.jetbrains.kotlin.psi.psiUtil.PsiUtilPackage;
@@ -42,18 +41,16 @@ import java.util.Collection;
 public class ResolveSessionForBodies implements KotlinCodeAnalyzer {
     private final Object createdForObject;
     private final ResolveSession resolveSession;
-    private final IDEResolveTaskManager resolveTaskManager;
     private final ResolveElementCache resolveElementCache;
 
-    public ResolveSessionForBodies(@NotNull Project project, @NotNull ResolveSession resolveSession, @NotNull IDEResolveTaskManager resolveTaskManager) {
-        this(project, project, resolveSession, resolveTaskManager);
+    public ResolveSessionForBodies(@NotNull Project project, @NotNull ResolveSession resolveSession) {
+        this(project, project, resolveSession);
     }
 
-    private ResolveSessionForBodies(Object createdForObject, Project project, ResolveSession resolveSession, @NotNull IDEResolveTaskManager resolveTaskManager) {
+    private ResolveSessionForBodies(Object createdForObject, Project project, ResolveSession resolveSession) {
         this.createdForObject = createdForObject;
         this.resolveSession = resolveSession;
-        this.resolveTaskManager = resolveTaskManager;
-        this.resolveElementCache = new ResolveElementCache(resolveSession, project, resolveTaskManager);
+        this.resolveElementCache = new ResolveElementCache(resolveSession, project);
     }
 
     @NotNull
@@ -140,7 +137,7 @@ public class ResolveSessionForBodies implements KotlinCodeAnalyzer {
 
     @NotNull
     public ResolveTaskManager getResolveTaskManager() {
-        return resolveTaskManager;
+        return resolveElementCache;
     }
 
     @NotNull
