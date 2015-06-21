@@ -67,7 +67,7 @@ public class Profiler {
     private long cumulative = 0;
     private boolean paused = true;
     private StackTraceElement[] stackTrace;
-    private boolean mute;
+    private boolean mute = true;
 
     private Profiler(@NotNull String name, @NotNull Logger log) {
         this.name = name;
