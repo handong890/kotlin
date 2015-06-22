@@ -46,8 +46,7 @@ import org.jetbrains.kotlin.utils.addToStdlib.firstIsInstanceOrNull
 public abstract class ElementResolver protected constructor(
         public val resolveSession: ResolveSession
 ) {
-
-    public open fun getElementAdditionalResolve(jetElement: JetElement): BindingContext {
+    protected open fun getElementAdditionalResolve(jetElement: JetElement): BindingTrace {
         return performElementAdditionalResolve(jetElement, jetElement, BodyResolveMode.FULL)
     }
 
@@ -64,15 +63,15 @@ public abstract class ElementResolver protected constructor(
         if (elementOfAdditionalResolve != null) {
             if (elementOfAdditionalResolve !is JetParameter) {
                 if (bodyResolveMode != BodyResolveMode.FULL && !hasElementAdditionalResolveCached(elementOfAdditionalResolve)) {
-                    return performElementAdditionalResolve(elementOfAdditionalResolve, jetElement, bodyResolveMode)
+                    return performElementAdditionalResolve(elementOfAdditionalResolve, jetElement, bodyResolveMode).getBindingContext()
                 }
 
-                return getElementAdditionalResolve(elementOfAdditionalResolve)
+                return getElementAdditionalResolve(elementOfAdditionalResolve).getBindingContext()
             }
 
             val klass = elementOfAdditionalResolve.getParentOfType<JetClass>(true)
             if (klass != null && elementOfAdditionalResolve.getParent() == klass.getPrimaryConstructorParameterList()) {
-                return getElementAdditionalResolve(klass)
+                return getElementAdditionalResolve(klass).getBindingContext()
             }
 
             // Parameters for function literal could be met inside other parameters. We can't make resolveToDescriptors for internal elements.
@@ -112,7 +111,7 @@ public abstract class ElementResolver protected constructor(
         return elementOfAdditionalResolve
     }
 
-    protected fun performElementAdditionalResolve(resolveElement: JetElement, contextElement: JetElement, bodyResolveMode: BodyResolveMode): BindingContext {
+    protected fun performElementAdditionalResolve(resolveElement: JetElement, contextElement: JetElement, bodyResolveMode: BodyResolveMode): BindingTrace {
         val file = resolveElement.getContainingJetFile()
 
         val statementFilter = if (bodyResolveMode != BodyResolveMode.FULL && resolveElement is JetDeclaration)
@@ -169,7 +168,7 @@ public abstract class ElementResolver protected constructor(
 
         profiler.end()
 
-        return trace.getBindingContext()
+        return trace
     }
 
     private fun packageRefAdditionalResolve(resolveSession: ResolveSession, jetElement: JetElement): BindingTrace {
@@ -363,8 +362,6 @@ public abstract class ElementResolver protected constructor(
                                        "Addition: ${namedFunction.getName()} ${namedFunction.hashCode()} $this " +
                                        "${PsiManager.getInstance(namedFunction.getProject()).getModificationTracker().getModificationCount()}")
         profiler.start()
-
-        assert(statementFilter != StatementFilter.NONE)
 
         val trace = createDelegationTrace(namedFunction)
 

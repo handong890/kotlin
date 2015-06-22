@@ -38,6 +38,7 @@ import org.jetbrains.kotlin.resolve.lazy.ProbablyNothingCallableNames;
 import org.jetbrains.kotlin.resolve.lazy.ResolveSession;
 import org.jetbrains.kotlin.resolve.scopes.JetScope;
 import org.jetbrains.kotlin.storage.LazyResolveStorageManager;
+import org.jetbrains.kotlin.storage.LockBasedLazyResolveStorageManager;
 import org.jetbrains.kotlin.storage.MemoizedFunctionToNotNull;
 import org.jetbrains.kotlin.types.DynamicTypesSettings;
 
@@ -45,28 +46,28 @@ import java.util.Collection;
 
 public class ResolveElementCache extends ElementResolver implements ResolveTaskManager {
     private final Project project;
-    private final CachedValue<MemoizedFunctionToNotNull<JetElement, BindingContext>> additionalResolveCache;
+    private final CachedValue<MemoizedFunctionToNotNull<JetElement, BindingTrace>> additionalResolveCache;
 
     public ResolveElementCache(ResolveSession resolveSession, Project project) {
         super(resolveSession);
         this.project = project;
 
-        final Function1<JetElement, BindingContext> countCachedTrace = new Function1<JetElement, BindingContext>() {
+        final Function1<JetElement, BindingTrace> countCachedTrace = new Function1<JetElement, BindingTrace>() {
             @Override
-            public BindingContext invoke(JetElement jetElement) {
+            public BindingTrace invoke(JetElement jetElement) {
                 return performElementAdditionalResolve(jetElement, jetElement, BodyResolveMode.FULL);
             }
         };
 
         // Recreate internal cache after change of modification count
         this.additionalResolveCache =
-                CachedValuesManager.getManager(project).createCachedValue(new CachedValueProvider<MemoizedFunctionToNotNull<JetElement, BindingContext>>() {
+                CachedValuesManager.getManager(project).createCachedValue(new CachedValueProvider<MemoizedFunctionToNotNull<JetElement, BindingTrace>>() {
                             @Nullable
                             @Override
-                            public Result<MemoizedFunctionToNotNull<JetElement, BindingContext>> compute() {
+                            public Result<MemoizedFunctionToNotNull<JetElement, BindingTrace>> compute() {
                                 ResolveSession resolveSession = ResolveElementCache.this.getResolveSession();
                                 LazyResolveStorageManager manager = resolveSession.getStorageManager();
-                                MemoizedFunctionToNotNull<JetElement, BindingContext> elementsCacheFunction =
+                                MemoizedFunctionToNotNull<JetElement, BindingTrace> elementsCacheFunction =
                                         manager.createSoftlyRetainedMemoizedFunction(countCachedTrace);
 
                                 return Result.create(elementsCacheFunction,
@@ -79,7 +80,7 @@ public class ResolveElementCache extends ElementResolver implements ResolveTaskM
 
     @NotNull
     @Override
-    public BindingContext getElementAdditionalResolve(@NotNull JetElement jetElement) {
+    protected BindingTrace getElementAdditionalResolve(@NotNull JetElement jetElement) {
         return additionalResolveCache.getValue().invoke(jetElement);
     }
 
@@ -129,7 +130,8 @@ public class ResolveElementCache extends ElementResolver implements ResolveTaskM
         BodyResolveContext resolveQueryContext =
                 new BodyResolveContext(DataFlowInfo.EMPTY, getResolveSession().getTrace(), functionDescriptor, declarationScope);
 
-        DelegatingBindingTrace trace = (DelegatingBindingTrace) getElementAdditionalResolve(function);
+        DelegatingBindingTrace trace = (DelegatingBindingTrace)(
+                ((LockBasedLazyResolveStorageManager.LockProtectedTrace) getElementAdditionalResolve(function)).getTrace());
 
         return new BodyResolveResult(trace, resolveQueryContext);
     }

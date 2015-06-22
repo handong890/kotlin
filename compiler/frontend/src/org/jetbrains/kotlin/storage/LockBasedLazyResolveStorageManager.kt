@@ -16,16 +16,16 @@
 
 package org.jetbrains.kotlin.storage
 
+import com.intellij.util.containers.ContainerUtil
 import org.jetbrains.annotations.TestOnly
 import org.jetbrains.kotlin.diagnostics.Diagnostic
+import org.jetbrains.kotlin.psi.JetExpression
 import org.jetbrains.kotlin.resolve.BindingContext
 import org.jetbrains.kotlin.resolve.BindingTrace
+import org.jetbrains.kotlin.resolve.diagnostics.Diagnostics
+import org.jetbrains.kotlin.types.JetType
 import org.jetbrains.kotlin.util.slicedMap.ReadOnlySlice
 import org.jetbrains.kotlin.util.slicedMap.WritableSlice
-import org.jetbrains.kotlin.resolve.diagnostics.Diagnostics
-import com.intellij.util.containers.ContainerUtil
-import org.jetbrains.kotlin.psi.JetExpression
-import org.jetbrains.kotlin.types.JetType
 
 public class LockBasedLazyResolveStorageManager(private val storageManager: StorageManager): StorageManager by storageManager, LazyResolveStorageManager {
     override fun <K, V> createSoftlyRetainedMemoizedFunction(compute: Function1<K, V>) =
@@ -39,7 +39,7 @@ public class LockBasedLazyResolveStorageManager(private val storageManager: Stor
     override fun createSafeTrace(originalTrace: BindingTrace) =
             LockProtectedTrace(storageManager, originalTrace)
 
-    private class LockProtectedContext(private val storageManager: StorageManager, private val context: BindingContext) : BindingContext {
+    private class LockProtectedContext(private val storageManager: StorageManager, public val context: BindingContext) : BindingContext {
         override fun getType(expression: JetExpression): JetType? = storageManager.compute { context.getType(expression) }
 
         override fun getDiagnostics(): Diagnostics = storageManager.compute { context.getDiagnostics() }
@@ -52,7 +52,7 @@ public class LockBasedLazyResolveStorageManager(private val storageManager: Stor
         override fun <K, V> getSliceContents(slice: ReadOnlySlice<K, V>) = storageManager.compute { context.getSliceContents<K, V>(slice) }
     }
 
-    private class LockProtectedTrace(private val storageManager: StorageManager, private val trace: BindingTrace) : BindingTrace {
+    public class LockProtectedTrace(private val storageManager: StorageManager, val trace: BindingTrace) : BindingTrace {
         override fun recordType(expression: JetExpression, type: JetType?) {
             storageManager.compute { trace.recordType(expression, type) }
         }
