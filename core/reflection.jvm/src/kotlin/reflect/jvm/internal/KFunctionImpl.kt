@@ -17,10 +17,14 @@
 package kotlin.reflect.jvm.internal
 
 import org.jetbrains.kotlin.descriptors.FunctionDescriptor
+import org.jetbrains.kotlin.resolve.scopes.JetScope
 import kotlin.jvm.internal.FunctionImpl
+import kotlin.jvm.internal.FunctionReference
+import kotlin.reflect.KDeclarationContainer
 import kotlin.reflect.KFunction
+import kotlin.reflect.KotlinReflectionInternalError
 
-abstract class KFunctionImpl private constructor(
+open class KFunctionImpl protected constructor(
         container: KCallableContainerImpl,
         signature: String,
         descriptorInitialValue: FunctionDescriptor?
@@ -53,4 +57,39 @@ abstract class KFunctionImpl private constructor(
 
     override fun toString(): String =
             ReflectionObjectRenderer.renderFunction(descriptor)
+}
+
+class KFunctionFromReferenceImpl(
+        val reference: FunctionReference
+): KFunctionImpl(
+        reference.getOwner() as? KCallableContainerImpl ?: EmptyContainerForLocal,
+        reference.getSignature()
+) {
+    override fun getArity() = reference.getArity()
+
+    override fun invoke(): Any? = reference()
+
+    override fun invoke(p1: Any?): Any? = reference(p1)
+
+    override fun invoke(p1: Any?, p2: Any?): Any? = reference(p1, p2)
+
+    override fun invoke(p1: Any?, p2: Any?, p3: Any?): Any? = reference(p1, p2, p3)
+
+    override fun invoke(p1: Any?, p2: Any?, p3: Any?, p4: Any?): Any? = reference(p1, p2, p3, p4)
+
+    override fun invoke(p1: Any?, p2: Any?, p3: Any?, p4: Any?, p5: Any?): Any? = reference(p1, p2, p3, p4, p5)
+
+    override fun invoke(p1: Any?, p2: Any?, p3: Any?, p4: Any?, p5: Any?, p6: Any?): Any? = reference(p1, p2, p3, p4, p5, p6)
+
+    // TODO
+}
+
+object EmptyContainerForLocal : KCallableContainerImpl() {
+    override val jClass: Class<*>
+        get() = fail()
+
+    override val scope: JetScope
+        get() = fail()
+
+    private fun fail() = throw KotlinReflectionInternalError("Introspecting local functions is not yet supported in Kotlin reflection")
 }

@@ -26,7 +26,7 @@ import org.jetbrains.kotlin.storage.StorageManager
 import kotlin.platform.platformStatic
 
 /**
- * Produces descriptors representing the fictitious classes for function types, such as kotlin.Function1 or kotlin.reflect.KMemberFunction0.
+ * Produces descriptors representing the fictitious classes for function types, such as kotlin.Function1 or kotlin.reflect.KFunction2.
  */
 public class BuiltInFictitiousFunctionClassFactory(
         private val storageManager: StorageManager,
@@ -43,7 +43,7 @@ public class BuiltInFictitiousFunctionClassFactory(
 
                 val arity = toInt(className.substring(prefix.length())) ?: continue
 
-                // TODO: validate arity, should be <= 255 for functions, <= 254 for members/extensions
+                // TODO: validate arity, should be <= 255
                 return KindWithArity(kind, arity)
             }
 
@@ -70,8 +70,7 @@ public class BuiltInFictitiousFunctionClassFactory(
         if ("Function" !in className) return null // An optimization
 
         val packageFqName = classId.getPackageFqName()
-        val kindWithArity = parseClassName(className, packageFqName) ?: return null
-        val (kind, arity) = kindWithArity // KT-5100
+        val (kind, arity) = parseClassName(className, packageFqName) ?: return null
 
         val containingPackageFragment = module.getPackage(packageFqName).fragments.single()
 

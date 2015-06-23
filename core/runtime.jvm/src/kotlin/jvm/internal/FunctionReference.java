@@ -21,12 +21,7 @@ import kotlin.reflect.*;
 
 import java.util.List;
 
-public abstract class FunctionReference
-        extends FunctionImpl
-        implements KTopLevelFunction,
-                   KMemberFunction,
-                   KTopLevelExtensionFunction,
-                   KLocalFunction {
+public abstract class FunctionReference extends FunctionImpl implements KFunction {
     private final int arity;
 
     public FunctionReference(int arity) {
