@@ -164,7 +164,9 @@ public abstract class ElementResolver protected constructor(
                 "${PsiManager.getInstance(resolveElement.getProject()).getModificationTracker().getModificationCount()}")
         profiler.start()
 
-        JetFlowInformationProvider(resolveElement, trace).checkDeclaration()
+        val controlFlowTrace = DelegatingBindingTrace(trace.getBindingContext(), "Elements control flow resolve")
+        JetFlowInformationProvider(resolveElement, controlFlowTrace).markStatements()
+        controlFlowTrace.addAllMyDataTo(trace, null, false)
 
         profiler.end()
 
