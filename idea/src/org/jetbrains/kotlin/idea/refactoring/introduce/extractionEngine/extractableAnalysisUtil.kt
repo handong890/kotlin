@@ -707,7 +707,7 @@ private fun ExtractionData.inferParametersInfo(
                 }
 
                 if (!extractThis) {
-                    parameter.currentName = originalDeclaration.getName()
+                    parameter.currentName = originalDeclaration.getNameIdentifier()?.getText()
                 }
 
                 parameter.refCount++
