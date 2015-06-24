@@ -165,7 +165,7 @@ public abstract class ElementResolver protected constructor(
         profiler.start()
 
         val controlFlowTrace = DelegatingBindingTrace(trace.getBindingContext(), "Elements control flow resolve")
-        JetFlowInformationProvider(resolveElement, controlFlowTrace).markStatements()
+        JetFlowInformationProvider(resolveElement, controlFlowTrace).checkDeclaration()
         controlFlowTrace.addAllMyDataTo(trace, null, false)
 
         profiler.end()
