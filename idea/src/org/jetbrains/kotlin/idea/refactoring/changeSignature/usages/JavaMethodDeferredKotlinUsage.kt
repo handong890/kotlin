@@ -45,6 +45,22 @@ public class DeferredSAMUsage(
         }
 }
 
+public class JavaMethodKotlinOverrideUsage(
+        val function: JetFunction,
+        val functionDescriptor: FunctionDescriptor
+): JavaMethodDeferredKotlinUsage<JetFunction>(function) {
+        override fun resolve(javaMethodChangeInfo: JetChangeInfo): JavaMethodKotlinUsageWithDelegate<JetFunction> {
+                return object : JavaMethodKotlinUsageWithDelegate<JetFunction>(function, javaMethodChangeInfo) {
+                        override val delegateUsage = JetFunctionDefinitionUsage(
+                                function,
+                                functionDescriptor,
+                                javaMethodChangeInfo.methodDescriptor.originalPrimaryFunction,
+                                null
+                        )
+                }
+        }
+}
+
 public class JavaConstructorDeferredUsageInDelegationCall(
         val delegationCall: JetConstructorDelegationCall
 ): JavaMethodDeferredKotlinUsage<JetConstructorDelegationCall>(delegationCall) {
