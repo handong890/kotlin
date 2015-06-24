@@ -366,6 +366,12 @@ public class JetExtractionTestGenerated extends AbstractJetExtractionTest {
                 doExtractFunctionTest(fileName);
             }
 
+            @TestMetadata("extractBlockContent.kt")
+            public void testExtractBlockContent() throws Exception {
+                String fileName = JetTestUtils.navigationMetadata("idea/testData/refactoring/extractFunction/basic/extractBlockContent.kt");
+                doExtractFunctionTest(fileName);
+            }
+
             @TestMetadata("fakeOverride.kt")
             public void testFakeOverride() throws Exception {
                 String fileName = JetTestUtils.navigationMetadata("idea/testData/refactoring/extractFunction/basic/fakeOverride.kt");
@@ -1937,9 +1943,9 @@ public class JetExtractionTestGenerated extends AbstractJetExtractionTest {
                     doExtractFunctionTest(fileName);
                 }
 
-                @TestMetadata("nonIdWithBackticks.kt")
-                public void testNonIdWithBackticks() throws Exception {
-                    String fileName = JetTestUtils.navigationMetadata("idea/testData/refactoring/extractFunction/parameters/misc/nonIdWithBackticks.kt");
+                @TestMetadata("nonIDWithBackticks.kt")
+                public void testNonIDWithBackticks() throws Exception {
+                    String fileName = JetTestUtils.navigationMetadata("idea/testData/refactoring/extractFunction/parameters/misc/nonIDWithBackticks.kt");
                     doExtractFunctionTest(fileName);
                 }
 
